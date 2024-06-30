@@ -2,7 +2,7 @@ import { LoginForm } from "./components/login-form";
 
 export default async function LoginPage() {
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <LoginForm />
     </div>
   );
