@@ -6,7 +6,7 @@ import Link from "next/link";
 export default async function Home() {
   const session = await auth();
   return (
-    <main className="flex flex-col gap-4 items-center p-8">
+    <div className="">
       <Link href={"/login"}>ログインページへ</Link>
       <form
         action={async () => {
@@ -17,6 +17,6 @@ export default async function Home() {
         <Button type="submit">ログアウト</Button>
       </form>
       <div>{JSON.stringify(session)}</div>
-    </main>
+    </div>
   );
 }
