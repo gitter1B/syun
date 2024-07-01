@@ -3,3 +3,9 @@ export type User = {
   username: string;
   password: string;
 };
+
+export type NavItem = {
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+};
