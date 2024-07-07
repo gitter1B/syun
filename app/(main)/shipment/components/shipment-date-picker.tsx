@@ -30,7 +30,7 @@ export function ShipmentDatePicker({ shipments }: Props) {
   const [date, setDate] = React.useState<Date>(selectedDate);
   const [open, setOpen] = React.useState<boolean>(false);
   const router = useRouter();
-  const isTablet = useMediaQuery("(min-width: 420px)");
+  const isTablet = useMediaQuery("(min-width: 500px)");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

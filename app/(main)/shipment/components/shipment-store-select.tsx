@@ -38,7 +38,7 @@ export function ShipmentStoreSelect({ stores, shipments }: Props) {
         router.push(`?${params.toString()}`);
       }}
     >
-      <SelectTrigger className="min-w-48">
+      <SelectTrigger className="min-w-32 min-[500px]:min-w-48 whitespace-nowrap overflow-hidden">
         <SelectValue placeholder="店舗を選択してください。" />
       </SelectTrigger>
       <SelectContent>
@@ -50,7 +50,11 @@ export function ShipmentStoreSelect({ stores, shipments }: Props) {
               (item) => item.storeId === store.id
             ).length;
             return (
-              <SelectItem key={store.id} value={store.id}>
+              <SelectItem
+                key={store.id}
+                value={store.id}
+                className="whitespace-nowrap"
+              >
                 <div className="flex gap-1">
                   {store.name}
                   {count > 0 && (

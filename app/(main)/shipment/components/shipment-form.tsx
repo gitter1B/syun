@@ -106,7 +106,7 @@ export function ShipmentForm({ products }: Props) {
                   <PopoverContent className="w-full max-w-96 p-0" align="start">
                     <Command>
                       <CommandInput
-                        className="text-base"
+                        className="text-[16px]"
                         placeholder="商品を検索"
                       />
                       <CommandEmpty>商品が見つかりませんでした。</CommandEmpty>
