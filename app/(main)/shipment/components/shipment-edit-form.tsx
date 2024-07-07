@@ -102,7 +102,10 @@ export function ShipmentEditForm({
                   </PopoverTrigger>
                   <PopoverContent className="w-full max-w-96 p-0" align="start">
                     <Command>
-                      <CommandInput placeholder="商品を検索" />
+                      <CommandInput
+                        className="text-[16px]"
+                        placeholder="商品を検索"
+                      />
                       <CommandEmpty>商品が見つかりませんでした。</CommandEmpty>
                       <CommandList>
                         <CommandGroup>

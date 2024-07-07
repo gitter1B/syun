@@ -37,10 +37,10 @@ export const ShipmentHeader = ({ shipments, stores, products }: Props) => {
           onClick={() => setFormOpen(!formOpen)}
         >
           <PlusIcon
-            className={cn("mr-2 transition-all", formOpen && "rotate-45")}
+            className={cn("mr transition-all", formOpen && "rotate-45")}
             size={20}
           />
-          <span className="text-secondary-foreground">
+          <span className="text-secondary-foreground ml-2 hidden min-[428px]:block ">
             {formOpen ? "閉じる" : "追加　"}
           </span>
         </Button>
