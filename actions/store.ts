@@ -1,9 +1,10 @@
 "use server";
-
-import { User } from "@/lib/types";
+import { Store } from "@/lib/types";
 import { sheets_v4 } from "googleapis";
 
-export const getUsers = async (sheets: sheets_v4.Sheets): Promise<User[]> => {
+export const getAllStores = async (
+  sheets: sheets_v4.Sheets
+): Promise<Store[]> => {
   const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
 
   if (!spreadsheetId) {
@@ -14,17 +15,15 @@ export const getUsers = async (sheets: sheets_v4.Sheets): Promise<User[]> => {
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: spreadsheetId,
-      range: "ユーザー",
+      range: "店舗",
     });
 
     const data = response.data.values;
-
     return data
       ? data.slice(1).map((row) => {
           return {
             id: row[0],
-            username: row[1],
-            password: row[2],
+            name: row[1],
           };
         })
       : [];

@@ -23,7 +23,8 @@ export const SideSheet = () => {
       <SheetTrigger>
         <MenuIcon size={32} />
       </SheetTrigger>
-      <SheetContent side={"left"}>
+      <SheetContent side={"left"} aria-describedby={undefined}>
+        <SheetTitle></SheetTitle>
         <SheetHeader className="mb-8 px-2 -mt-2">
           <div className="flex items-center gap-4">
             <SheetClose asChild>

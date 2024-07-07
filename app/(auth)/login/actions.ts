@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { LoginSchema } from "@/schemas";
-import { signIn } from "@/auth";
+import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
@@ -34,4 +34,8 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     }
     throw error;
   }
+};
+
+export const logout = async () => {
+  await signOut({ redirectTo: "/login" });
 };

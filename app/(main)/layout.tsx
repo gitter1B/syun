@@ -11,7 +11,7 @@ export default function MainLayout({
       <Header />
       <main className="flex flex-1">
         <Sidebar />
-        <div className="p-8 bg-accent/30 w-full">{children}</div>
+        <div className="p-4 md:p-8 bg-muted/10 w-full">{children}</div>
       </main>
     </>
   );
