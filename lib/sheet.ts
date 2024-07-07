@@ -1,6 +1,5 @@
 "use server";
 import { google, sheets_v4 } from "googleapis";
-import { User } from "./types";
 
 export const getSheets = async (): Promise<sheets_v4.Sheets> => {
   const privateKey = process.env.PRIVATE_KEY?.replace(/\\n/g, "\n");
@@ -17,35 +16,116 @@ export const getSheets = async (): Promise<sheets_v4.Sheets> => {
   return sheets;
 };
 
-// export const getShipmentHistories = async (
-//   sheets: sheets_v4.Sheets
-// ): Promise<User[]> => {
-//   const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+export const appendValues = async (
+  sheets: sheets_v4.Sheets,
+  spreadsheetId: string | undefined,
+  sheetName: string,
+  values: string[][]
+) => {
+  try {
+    if (spreadsheetId) {
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: sheetName,
+        valueInputOption: "RAW",
+        requestBody: {
+          values: values,
+        },
+      });
+    }
+  } catch (error: any) {
+    console.error(error.message);
+  }
+};
 
-//   if (!spreadsheetId) {
-//     console.error("Spreadsheet ID is undefined");
-//     return [];
-//   }
+export async function getSheetIdBySheetName(
+  sheets: sheets_v4.Sheets,
+  spreadsheetId: string | undefined,
+  targetSheetName: string
+) {
+  try {
+    // スプレッドシートのプロパティを取得
+    const response = await sheets.spreadsheets.get({
+      spreadsheetId,
+    });
 
-//   try {
-//     const response = await sheets.spreadsheets.values.get({
-//       spreadsheetId: spreadsheetId,
-//       range: "ユーザー",
-//     });
+    // プロパティから各シートの情報を取得
+    const sheetsInfo = response.data.sheets || [];
 
-//     const data = response.data.values;
+    // シート名からシートIDを取得
+    const sheetInfo = sheetsInfo.find(
+      (sheet) => sheet.properties?.title === targetSheetName
+    );
 
-//     return data
-//       ? data.slice(1).map((row) => {
-//           return {
-//             id: row[0],
-//             username: row[1],
-//             password: row[2],
-//           };
-//         })
-//       : [];
-//   } catch (error: unknown) {
-//     console.error((error as Error).message);
-//     return [];
-//   }
-// };
+    if (sheetInfo) {
+      return sheetInfo.properties?.sheetId;
+    } else {
+      console.log(`Sheet with name '${targetSheetName}' not found.`);
+    }
+  } catch (error: any) {
+    console.error("エラーが発生しました:", error.message);
+  }
+}
+
+export const rowUpdate = async (
+  sheets: sheets_v4.Sheets,
+  spreadsheetId: string,
+  spreadsheetName: string,
+  rowNumber: number,
+  updateValues: string[][]
+) => {
+  try {
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        data: [
+          {
+            majorDimension: "ROWS",
+            range: `${spreadsheetName}!A${rowNumber}:${rowNumber}`,
+            values: updateValues,
+          },
+        ],
+        valueInputOption: "RAW",
+      },
+    });
+  } catch (error: any) {
+    console.error(error.message);
+  }
+};
+
+export const rowDelete = async (
+  sheets: sheets_v4.Sheets,
+  spreadsheetId: string,
+  spreadsheetName: string,
+  rowNumber: number
+) => {
+  try {
+    const sheetId = await getSheetIdBySheetName(
+      sheets,
+      spreadsheetId,
+      spreadsheetName
+    );
+
+    const response = await sheets.spreadsheets.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        requests: [
+          {
+            deleteDimension: {
+              range: {
+                sheetId,
+                dimension: "ROWS",
+                startIndex: rowNumber - 1,
+                endIndex: rowNumber,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    console.log(`行 ${rowNumber} を削除しました。`);
+  } catch (error: any) {
+    console.error("エラーが発生しました:", error.message);
+  }
+};
