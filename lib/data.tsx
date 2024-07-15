@@ -1,6 +1,5 @@
 import { NavItem } from "@/lib/types";
-import { format as formatTz } from "date-fns-tz";
-import { HomeIcon, TruckIcon } from "lucide-react";
+import { CalculatorIcon, HomeIcon, TruckIcon } from "lucide-react";
 
 export const linkItems: NavItem[] = [
   { href: "/", label: "ホーム", icon: <HomeIcon /> },
@@ -8,5 +7,10 @@ export const linkItems: NavItem[] = [
     href: "/shipment",
     label: "出荷",
     icon: <TruckIcon />,
+  },
+  {
+    href: "/sales",
+    label: "販売",
+    icon: <CalculatorIcon />,
   },
 ];

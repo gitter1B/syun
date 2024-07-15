@@ -56,7 +56,7 @@ export const ShipmentTable = async ({
         {[...shipmentData].map((item) => {
           return (
             <TableRow key={item.id}>
-              <TableCell className="font-semibold whitespace-nowrap">
+              <TableCell className="text-[16px] font-semibold whitespace-nowrap">
                 {item.productName}
               </TableCell>
               <TableCell className="text-right whitespace-nowrap">

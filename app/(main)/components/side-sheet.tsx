@@ -20,7 +20,7 @@ export const SideSheet = () => {
   const [open, setOpen] = useState<boolean>(false);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger>
+      <SheetTrigger className="flex items-center">
         <MenuIcon size={32} />
       </SheetTrigger>
       <SheetContent side={"left"} aria-describedby={undefined}>

@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2Icon, LogOutIcon } from "lucide-react";
+import { Loader2Icon, LogOutIcon, UserIcon } from "lucide-react";
 import { logout } from "@/app/(auth)/login/actions";
 import { useTransition } from "react";
 
@@ -19,7 +19,9 @@ export const UserMenu = () => {
       <DropdownMenuTrigger>
         <Avatar>
           <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>CN</AvatarFallback>
+          <AvatarFallback>
+            <UserIcon />
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
