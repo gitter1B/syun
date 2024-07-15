@@ -7,11 +7,13 @@ export const Header = () => {
   return (
     <header className="min-h-16 border-b flex items-center px-4 md:px-8">
       <div className="flex items-center gap-4">
-        <SideSheet />
+        <div className="lg:hidden">
+          <SideSheet />
+        </div>
         <Link href={"/"}>LOGO</Link>
       </div>
       <span className="flex-1"></span>
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         <ModeToggle />
         <UserMenu />
       </div>

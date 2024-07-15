@@ -125,7 +125,3 @@ export const deleteShipment = async (shipmentId: string) => {
     revalidatePath("/shipment");
   }
 };
-
-export const editShipment = async (shipmentId: string) => {
-  console.log(shipmentId);
-};

@@ -23,6 +23,29 @@ export type Shipment = {
   storeId: string;
 };
 
+export type Sales = {
+  id: string;
+  date: string;
+  productId: string;
+  unitPrice: number;
+  quantity: number;
+  storeId: string;
+};
+
+export type TotalSales = {
+  productId: string;
+  productName: string;
+  totalQuantity: number;
+  totalPrice: number;
+};
+
+export type SalesSearchParams = {
+  storeId: string;
+  year: string;
+  month: string;
+  page: string;
+};
+
 export type ShipmentItem = Shipment & {
   productName: string;
   storeName: string;
