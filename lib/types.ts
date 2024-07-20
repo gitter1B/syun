@@ -51,6 +51,23 @@ export type ShipmentItem = Shipment & {
   storeName: string;
 };
 
+export type Waste = {
+  id: string;
+  date: string;
+  storeId: string;
+  productId: string;
+  unitPrice: number;
+  quantity: number;
+};
+
+export type Stock = {
+  id: string;
+  storeId: string;
+  productId: string;
+  unitPrice: number;
+  quantity: number;
+};
+
 export type NavItem = {
   label: string;
   href: string;

@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { createSales } from "./actions";
+import { convertSales, convertShipments, convertWastes } from "./actions";
 
 export default async function TestPage() {
   return (
-    <div className="p-8 grid grid-cols-2 items-center">
+    <div className="flex justify-center items-center h-dvh">
       <form
-        action={async (formData: FormData) => {
+        action={async () => {
           "use server";
-          // await createSales();
+          // await convertWastes();
+          // await convertShipments();
+          // await convertSales();
         }}
       >
-        <Button type="submit">更新</Button>
+        <Button type="submit">テスト</Button>
       </form>
     </div>
   );

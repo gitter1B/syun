@@ -20,13 +20,10 @@ type Props = {
 export function StoreSelect({ stores, resetPage }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const storeId: string = searchParams.get("storeId")!;
-  const defaultValue: string = stores.map((s) => s.id).includes(storeId)
-    ? storeId
-    : "0";
+  const storeId: string | undefined = searchParams.get("storeId") || "all";
   return (
     <Select
-      defaultValue={defaultValue}
+      defaultValue={storeId}
       onValueChange={(value) => {
         const params = new URLSearchParams(window.location.search);
         params.set("storeId", value);
@@ -41,7 +38,7 @@ export function StoreSelect({ stores, resetPage }: Props) {
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectItem key={"0"} value={"0"}>
+          <SelectItem key={"all"} value={"all"}>
             全店舗
           </SelectItem>
           {[...stores].map((store) => {

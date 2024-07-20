@@ -1,5 +1,5 @@
 import { NavItem } from "@/lib/types";
-import { CalculatorIcon, HomeIcon, TruckIcon } from "lucide-react";
+import { CalculatorIcon, HomeIcon, PackageIcon, TruckIcon } from "lucide-react";
 
 export const linkItems: NavItem[] = [
   { href: "/", label: "ホーム", icon: <HomeIcon /> },
@@ -12,5 +12,10 @@ export const linkItems: NavItem[] = [
     href: "/sales",
     label: "販売",
     icon: <CalculatorIcon />,
+  },
+  {
+    href: "/stock",
+    label: "残数",
+    icon: <PackageIcon />,
   },
 ];
