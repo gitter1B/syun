@@ -20,3 +20,15 @@ export const ShipmentSchema = z.object({
     .min(1, { message: "個数を入力してください。" })
     .regex(/^\d*$/, "数字のみを入力してください"),
 });
+
+export const WasteSchema = z.object({
+  date: z.date({
+    required_error: "日付を選択してください。",
+  }),
+  quantity: z
+    .string()
+    .min(1, {
+      message: "数量を入力してください。",
+    })
+    .regex(/^\d*$/, { message: "数字を入力してください。" }),
+});

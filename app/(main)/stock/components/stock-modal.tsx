@@ -43,8 +43,6 @@ export const StockModal = ({ productName, stock }: Props) => {
     setQuantity((prev) => {
       const prevNumber: number = Number(prev);
 
-      console.log(prevNumber + addValue);
-
       if (prevNumber + addValue <= 1) {
         return "1";
       } else if (prevNumber + addValue >= stock.quantity) {
