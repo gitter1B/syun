@@ -60,6 +60,11 @@ export type Waste = {
   quantity: number;
 };
 
+export type WasteItem = Waste & {
+  storeName: string;
+  productName: string;
+};
+
 export type Stock = {
   id: string;
   storeId: string;
@@ -72,4 +77,9 @@ export type NavItem = {
   label: string;
   href: string;
   icon: React.ReactNode;
+};
+
+export type Item = {
+  value: string;
+  label: string;
 };
