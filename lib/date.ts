@@ -64,3 +64,16 @@ export async function getMonthChartData(
     };
   });
 }
+
+export function convertDateTextToDateString(text: string): string {
+  const match = text.match(/\d{4}年\d{2}月\d{2}日/);
+  if (match) {
+    const dateStr = match[0]
+      .replace("年", "-")
+      .replace("月", "-")
+      .replace("日", "");
+    return dateStr;
+  } else {
+    return "";
+  }
+}

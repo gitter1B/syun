@@ -34,7 +34,7 @@ export function SearchSelect({ items, name, placeholder }: Props) {
         });
       }}
     >
-      <SelectTrigger className="min-w-48">
+      <SelectTrigger className="w-48">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
