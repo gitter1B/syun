@@ -32,6 +32,10 @@ export type Sales = {
   storeId: string;
 };
 
+export type SalesItem = Sales & {
+  productName: string;
+};
+
 export type TotalSales = {
   productId: string;
   productName: string;
@@ -39,16 +43,24 @@ export type TotalSales = {
   totalPrice: number;
 };
 
-export type SalesSearchParams = {
-  storeId: string;
-  year: string;
-  month: string;
-  page: string;
+export type SyunSales = {
+  date: string;
+  storeName: string;
+  productName: string;
+  unitPrice: number;
+  quantity: number;
 };
 
+// export type SalesSearchParams = {
+//   storeId: string;
+//   year: string;
+//   month: string;
+//   page: string;
+// };
+
 export type ShipmentItem = Shipment & {
-  productName: string;
   storeName: string;
+  productName: string;
 };
 
 export type Waste = {

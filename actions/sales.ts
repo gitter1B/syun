@@ -1,12 +1,19 @@
+"use server";
 import {
   Product,
+  SyunSales,
   Sales,
-  SalesSearchParams,
   Store,
   TotalSales,
+  SalesItem,
 } from "@/lib/types";
 import { sheets_v4 } from "googleapis";
 import { format } from "date-fns-tz";
+import * as cheerio from "cheerio";
+import { convertDateTextToDateString } from "@/lib/date";
+import { getSheets } from "@/lib/sheet";
+import { convertProducts, convertStores } from "@/lib/convert-data";
+import { getAllProducts } from "./product";
 
 export const getAllSales = async (
   sheets: sheets_v4.Sheets
@@ -45,49 +52,147 @@ export const getAllSales = async (
   }
 };
 
-export const getFilteredSalesData = async (
-  salesData: Sales[],
-  searchParams: SalesSearchParams,
-  stores: Store[]
-) => {
-  const thisYear: number = Number(
-    format(new Date(), "yyyy", {
-      timeZone: "Asia/Tokyo",
-    })
-  );
-  const years: number[] = Array.from({ length: thisYear - 2020 }).map(
-    (_, i) => 2021 + i
-  );
-  const months: number[] = Array.from({ length: 12 }).map((_, i) => i + 1);
+export const getSalesData = async (
+  storeId: string,
+  from: string,
+  to: string
+): Promise<SalesItem[]> => {
+  const sheets: sheets_v4.Sheets = await getSheets();
+  const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
 
-  const year: number = years.includes(Number(searchParams.year))
-    ? Number(searchParams.year)
-    : thisYear;
-  const month: number = months.includes(Number(searchParams.month))
-    ? Number(searchParams.month)
-    : 0;
-  const storeId: string = stores.map((s) => s.id).includes(searchParams.storeId)
-    ? searchParams.storeId
-    : "0";
+  if (!spreadsheetId) {
+    console.error("Spreadsheet ID is undefined");
+    return [];
+  }
 
-  return salesData.filter((item) => {
-    const date: Date = new Date(item.date);
-    return (
-      year === date.getFullYear() &&
-      (month <= 0 || month === date.getMonth() + 1) &&
-      (storeId !== "0" ? item.storeId === storeId : true)
+  try {
+    const response = await sheets.spreadsheets.values.batchGet({
+      spreadsheetId: spreadsheetId,
+      ranges: ["商品", "店舗", "販売"],
+    });
+
+    const data: sheets_v4.Schema$ValueRange[] | undefined =
+      response.data.valueRanges;
+    if (!data) {
+      return [];
+    }
+
+    const products: Product[] = await convertProducts(data[0].values);
+    const stores: Store[] = await convertStores(data[1].values);
+    const salesData: SalesItem[] = data[2].values
+      ? data[2].values
+          ?.slice(1)
+          .filter((row) => {
+            const storeCondition: boolean =
+              storeId === "all" ? true : row[5] === storeId;
+            const startCondition: boolean =
+              new Date(from).getTime() <= new Date(row[1]).getTime();
+            const endCondition: boolean =
+              new Date(row[1]).getTime() <= new Date(to).getTime();
+            return storeCondition && startCondition && endCondition;
+          })
+          .map((row) => {
+            const product: Product = products.find((p) => p.id === row[2])!;
+            return {
+              id: row[0],
+              date: row[1],
+              productId: row[2],
+              unitPrice: Number(row[3]),
+              quantity: Number(row[4]),
+              storeId: row[5],
+              productName: product.name,
+            };
+          })
+      : [];
+
+    const latestId: number = Math.max(
+      ...salesData.map((item) => Number(item.id))
     );
-  });
+    const { todaySyunSalesData }: { todaySyunSalesData: SyunSales[] } =
+      await getTodaySyunSalesData();
+    const todaySalesData: SalesItem[] = todaySyunSalesData
+      .map((item, index) => {
+        const productId: string =
+          products.find((p) => p.name === item.productName)?.id || "";
+        const storeId: string =
+          stores.find((s) => s.name === item.storeName)?.id || "";
+        return {
+          id: (latestId + index + 1).toString(),
+          date: item.date,
+          productId: productId,
+          unitPrice: item.unitPrice,
+          quantity: item.quantity,
+          storeId: storeId,
+          productName: item.productName,
+        };
+      })
+      .filter((item) => {
+        const storeCondition: boolean =
+          storeId === "all" ? true : item.storeId === storeId;
+        const startCondition: boolean =
+          new Date(from).getTime() <= new Date(item.date).getTime();
+        const endCondition: boolean =
+          new Date(item.date).getTime() <= new Date(to).getTime();
+        return storeCondition && startCondition && endCondition;
+      });
+    if (
+      salesData.map((item) => item.date).includes(todaySalesData.at(0)?.date!)
+    ) {
+      return salesData;
+    }
+    return [...salesData, ...todaySalesData];
+  } catch (error: unknown) {
+    console.error((error as Error).message);
+    return [];
+  }
 };
+
+// export const getFilteredSalesData = async (
+//   salesData: Sales[],
+//   searchParams: SalesSearchParams,
+//   stores: Store[]
+// ) => {
+//   const thisYear: number = Number(
+//     format(new Date(), "yyyy", {
+//       timeZone: "Asia/Tokyo",
+//     })
+//   );
+//   const years: number[] = Array.from({ length: thisYear - 2020 }).map(
+//     (_, i) => 2021 + i
+//   );
+//   const months: number[] = Array.from({ length: 12 }).map((_, i) => i + 1);
+
+//   const year: number = years.includes(Number(searchParams.year))
+//     ? Number(searchParams.year)
+//     : thisYear;
+//   const month: number = months.includes(Number(searchParams.month))
+//     ? Number(searchParams.month)
+//     : 0;
+//   const storeId: string = stores.map((s) => s.id).includes(searchParams.storeId)
+//     ? searchParams.storeId
+//     : "0";
+
+//   return salesData.filter((item) => {
+//     const date: Date = new Date(item.date);
+//     return (
+//       year === date.getFullYear() &&
+//       (month <= 0 || month === date.getMonth() + 1) &&
+//       (storeId !== "0" ? item.storeId === storeId : true)
+//     );
+//   });
+// };
+
 export const getTotalSalesData = async (
-  salesData: Sales[],
-  products: Product[]
+  salesData: SalesItem[]
 ): Promise<TotalSales[]> => {
-  const totalData: TotalSales[] = products
-    .map((product) => {
+  const productIds = [...new Set(salesData.map((item) => item.productId))];
+
+  const totalData: TotalSales[] = productIds
+    .map((productId) => {
       const productFilteredData = salesData.filter(
-        (item) => item.productId === product.id
+        (item) => item.productId === productId
       );
+      const productName: string = productFilteredData[0].productName;
       const totalQuantity: number = productFilteredData.reduce(
         (prev, cur) => prev + cur.quantity,
         0
@@ -97,8 +202,8 @@ export const getTotalSalesData = async (
         0
       );
       return {
-        productId: product.id,
-        productName: product.name,
+        productId: productId,
+        productName: productName,
         totalPrice: totalPrice,
         totalQuantity: totalQuantity,
       };
@@ -108,4 +213,51 @@ export const getTotalSalesData = async (
     (a, b) => b.totalPrice - a.totalPrice
   );
   return sortedData;
+};
+
+export const getTodaySyunSalesData = async (): Promise<{
+  header: string;
+  todaySyunSalesData: SyunSales[];
+}> => {
+  const syunUrl: string | undefined = process.env.SYUNURL;
+  const syunId: string | undefined = process.env.SYUNID;
+  const syunPw: string | undefined = process.env.SYUNPW;
+  const todayUrl: string = `${syunUrl}?id=${syunId}&pw=${syunPw}&mode=yesterday`;
+  const textDecoder = new TextDecoder("shift-jis");
+  const response = await fetch(todayUrl, { cache: "no-store" });
+  const arrayBuffer = await response.arrayBuffer();
+  const html = textDecoder.decode(arrayBuffer);
+  const $ = cheerio.load(html, { decodeEntities: false });
+  const header: string = $("h3").text();
+  const date = convertDateTextToDateString(header);
+  let storeName: string = "";
+  let todaySyunSalesData: SyunSales[] = [];
+  $('table[id="ls"] > tbody > tr').each((index, element) => {
+    const childCount: number = $(element).children().length;
+    const isTd: boolean = $(element).children().first().is("td");
+    if (isTd && childCount === 1) {
+      storeName = $(element).find("td:nth-child(1)").text().trim();
+    }
+    if (isTd && childCount === 4) {
+      const productName: string = $(element)
+        .find("td:nth-child(1)")
+        .text()
+        .trim();
+      const unitPrice: number = parseInt(
+        $(element).find("td:nth-child(2)").text()
+      );
+      const quantity: number = parseInt(
+        $(element).find("td:nth-child(3)").text()
+      );
+
+      todaySyunSalesData.push({
+        date: date,
+        storeName: storeName,
+        productName: productName,
+        unitPrice: unitPrice,
+        quantity: quantity,
+      });
+    }
+  });
+  return { header, todaySyunSalesData };
 };

@@ -26,7 +26,7 @@ export const WasteList = async ({ searchParams }: Props) => {
           return <WasteCard key={item.id} wasteItem={item} />;
         })}
       </div>
-      <Pagination maxPage={wastes.length / 12} />
+      <Pagination maxPage={Math.ceil(wastes.length / 12)} />
     </div>
   );
 };

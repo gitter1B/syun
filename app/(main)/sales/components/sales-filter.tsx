@@ -1,25 +1,27 @@
-import * as React from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { FilterIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { sheets_v4 } from "googleapis";
+import { getSheets } from "@/lib/sheet";
+import { Store } from "@/lib/types";
+import { getAllStores } from "@/actions/store";
+import { DateRangePicker } from "./date-range-picker";
+import { SearchSelect } from "../../components/search-select";
 
-type Props = {
-  children: React.ReactNode;
-};
-export const SalesFilter = ({ children }: Props) => {
+export const SalesFilter = async () => {
+  const sheets: sheets_v4.Sheets = await getSheets();
+  const stores: Store[] = await getAllStores(sheets);
+  const storeItems: { value: string; label: string }[] = [
+    { value: "all", label: "全店舗" },
+    ...stores.map((s) => {
+      return { value: s.id, label: s.name };
+    }),
+  ];
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant={"secondary"} className="gap-2">
-          <FilterIcon />
-          フィルタ
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start">{children}</PopoverContent>
-    </Popover>
+    <div className="flex flex-col sm:flex-row gap-2">
+      <DateRangePicker />
+      <SearchSelect
+        items={storeItems}
+        name="storeId"
+        placeholder="店舗を選択"
+      />
+    </div>
   );
 };
