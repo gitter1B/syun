@@ -146,6 +146,7 @@ export const addWaste = async (
   ];
   await appendValues(sheets, spreadsheetId, "廃棄", newValues);
   revalidatePath("/stock");
+  revalidatePath("/waste");
 };
 
 export const updateWaste = async (
