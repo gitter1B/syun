@@ -116,7 +116,6 @@ export function DateRangePicker({
                     "yyyy-MM-dd"
                   );
                   const to: string = format(new Date(date?.to!), "yyyy-MM-dd");
-                  console.log(from, to);
                   params.set("from", from);
                   params.set("to", to);
                   params.delete("page");

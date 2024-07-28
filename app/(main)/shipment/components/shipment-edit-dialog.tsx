@@ -18,11 +18,10 @@ type Props = {
   products: Product[];
 };
 export const ShipmentEditDialog = ({ shipmentItem, products }: Props) => {
-  const [open, setOpen] = useState<boolean>(false);
-
   const { storeName, date } = shipmentItem;
   const [year, month, day] = date.split("-");
   const formatDate = `${year}年${month}月${day}日`;
+  const [open, setOpen] = useState<boolean>(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -43,7 +42,7 @@ export const ShipmentEditDialog = ({ shipmentItem, products }: Props) => {
         <ShipmentEditForm
           shipmentItem={shipmentItem}
           products={products}
-          dialogClose={() => {
+          onSuccess={() => {
             setOpen(false);
           }}
         />

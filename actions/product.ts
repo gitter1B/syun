@@ -1,6 +1,6 @@
 "use server";
 
-import { Product } from "@/lib/types";
+import { Product, Shipment } from "@/lib/types";
 import { sheets_v4 } from "googleapis";
 
 export const getAllProducts = async (
@@ -32,4 +32,30 @@ export const getAllProducts = async (
     console.error((error as Error).message);
     return [];
   }
+};
+
+export const getRecentSortedProducts = async (
+  shipments: Shipment[],
+  products: Product[]
+): Promise<Product[]> => {
+  const recentProductIds: string[] = [
+    ...new Set(
+      shipments
+        .toSorted(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        .map((item) => item.productId)
+    ),
+  ].slice(0, 9);
+
+  const recentProducts: Product[] = recentProductIds
+    .map((id) => products.find((product) => product.id === id))
+    .filter((product) => product !== undefined) as Product[];
+
+  const restProducts: Product[] = products.filter(
+    (product) => !recentProductIds.includes(product.id)
+  );
+  const sortedProducts: Product[] = [...recentProducts, ...restProducts];
+
+  return sortedProducts;
 };

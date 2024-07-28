@@ -2,7 +2,7 @@ import { getSheets } from "@/lib/sheet";
 import { Product, Shipment, ShipmentItem, Store } from "@/lib/types";
 import { sheets_v4 } from "googleapis";
 import { getAllStores } from "@/actions/store";
-import { getAllProducts } from "@/actions/product";
+import { getAllProducts, getRecentSortedProducts } from "@/actions/product";
 import { getAllShipments } from "@/actions/shipment";
 import { ShipmentTable } from "./components/shipment-table";
 import { format } from "date-fns-tz";
@@ -27,6 +27,10 @@ export default async function ShipmentPage({
   const stores: Store[] = await getAllStores(sheets);
   const products: Product[] = await getAllProducts(sheets);
   const shipments: Shipment[] = await getAllShipments(sheets);
+  const sortedProducts: Product[] = await getRecentSortedProducts(
+    shipments,
+    products
+  );
 
   return (
     <div className="flex w-full h-full">
@@ -49,7 +53,7 @@ export default async function ShipmentPage({
       </div>
       <Separator className="mx-4 hidden xl:block" orientation="vertical" />
       <div className="hidden xl:block">
-        <ShipmentForm products={products} />
+        <ShipmentForm products={sortedProducts} />
       </div>
     </div>
   );

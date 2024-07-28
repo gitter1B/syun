@@ -76,52 +76,72 @@ export const updateShipment = async (
   shipmentId: string,
   date: string,
   storeId: string
-) => {
+): Promise<{ status: string; message: string }> => {
   const validatedFields = ShipmentSchema.safeParse(values);
   if (!validatedFields.success) {
     return {
+      status: "error",
       message: "入力の形式が正しくありません。もう一度入力してください。",
     };
   }
-  const { product: productId, unitPrice, quantity } = values;
-  const sheets: sheets_v4.Sheets = await getSheets();
-  const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
-  const shipments: Shipment[] = await getAllShipments(sheets);
-  let rowNumber: number = 0;
-  for (let i = 0; i < shipments.length; i++) {
-    if (shipments[i].id === shipmentId) {
-      rowNumber = i + 2;
+  try {
+    const { product: productId, unitPrice, quantity } = values;
+    const sheets: sheets_v4.Sheets = await getSheets();
+    const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+    const shipments: Shipment[] = await getAllShipments(sheets);
+    let rowNumber: number = 0;
+    for (let i = 0; i < shipments.length; i++) {
+      if (shipments[i].id === shipmentId) {
+        rowNumber = i + 2;
+      }
     }
-  }
 
-  const updateValues: string[][] = [
-    [
-      shipmentId.toString(),
-      date,
-      productId,
-      unitPrice.toString(),
-      quantity.toString(),
-      storeId,
-    ],
-  ];
-  if (spreadsheetId) {
+    const updateValues: string[][] = [
+      [
+        shipmentId.toString(),
+        date,
+        productId,
+        unitPrice.toString(),
+        quantity.toString(),
+        storeId,
+      ],
+    ];
+    if (!spreadsheetId) {
+      return { status: "error", message: "変更されませんでした。" };
+    }
     await rowUpdate(sheets, spreadsheetId, "出荷", rowNumber, updateValues);
+  } catch (error) {
+    console.error(error);
+    return { status: "error", message: "変更されませんでした。" };
+  } finally {
     revalidatePath("/shipment");
+    return { status: "success", message: "変更されました。" };
   }
 };
 
-export const deleteShipment = async (shipmentId: string) => {
-  const sheets: sheets_v4.Sheets = await getSheets();
-  const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
-  const shipments: Shipment[] = await getAllShipments(sheets);
-  let rowNumber: number = 0;
-  for (let i = 0; i < shipments.length; i++) {
-    if (shipments[i].id === shipmentId) {
-      rowNumber = i + 2;
+export const deleteShipment = async (
+  shipmentId: string
+): Promise<{ status: string; message: string }> => {
+  try {
+    const sheets: sheets_v4.Sheets = await getSheets();
+    const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+    const shipments: Shipment[] = await getAllShipments(sheets);
+    let rowNumber: number = 0;
+    for (let i = 0; i < shipments.length; i++) {
+      if (shipments[i].id === shipmentId) {
+        rowNumber = i + 2;
+      }
     }
-  }
-  if (spreadsheetId) {
+
+    if (!spreadsheetId) {
+      return { status: "error", message: "削除できませんでした。" };
+    }
     await rowDelete(sheets, spreadsheetId, "出荷", rowNumber);
+  } catch (error) {
+    console.error(error);
+    return { status: "error", message: "削除できませんでした。" };
+  } finally {
     revalidatePath("/shipment");
+    return { status: "success", message: "削除しました。" };
   }
 };

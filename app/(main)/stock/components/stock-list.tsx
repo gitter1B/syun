@@ -18,7 +18,7 @@ export const StockList = async () => {
   const stores: Store[] = await convertStores(data[1].values);
   const existStoreIds: string[] = [
     ...new Set(stocks.map((item) => item.storeId)),
-  ].sort((a, b) => Number(a) - Number(b));
+  ].toSorted((a, b) => Number(a) - Number(b));
 
   return (
     <div className="flex flex-col gap-2">
