@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { LineChartIcon } from "lucide-react";
+import { ChevronRightIcon, LineChartIcon } from "lucide-react";
 
 type Props = {
   productId?: string;
@@ -30,8 +30,8 @@ export const SalesCard = ({
           {productName}
         </h2>
         <Button asChild variant={"outline"}>
-          <Link href={`/sales/detail/${productId}`}>
-            <LineChartIcon className="mr-2" size={20} />
+          <Link href={`/sales/detail/${productId}`} className="flex gap-2">
+            <LineChartIcon size={20} />
             詳細
           </Link>
         </Button>

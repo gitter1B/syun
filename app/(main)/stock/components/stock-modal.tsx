@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Stock } from "@/lib/types";
-import { Loader2Icon } from "lucide-react";
+import { Stock, StockItem } from "@/lib/types";
+import { Loader2Icon, PackageXIcon } from "lucide-react";
 import { ChangeEvent, MouseEvent, useState, useTransition } from "react";
 import * as React from "react";
 import { format } from "date-fns-tz";
@@ -27,10 +27,9 @@ import {
 } from "@/components/ui/popover";
 
 type Props = {
-  productName: string;
-  stock: Stock;
+  stock: StockItem;
 };
-export const StockModal = ({ productName, stock }: Props) => {
+export const StockModal = ({ stock }: Props) => {
   const [open, setOpen] = useState<boolean>(false);
   const [date, setDate] = React.useState<Date | undefined>(
     new Date(format(new Date(), "yyyy-MM-dd", { timeZone: "Asia/Tokyo" }))
@@ -61,17 +60,22 @@ export const StockModal = ({ productName, stock }: Props) => {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant={"outline"} className="font-semibold">
-          修正
+        <Button variant={"outline"}>
+          <PackageXIcon className="mr-2" size={20} />
+          <span className="font-semibold">回/廃</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{productName}</DialogTitle>
+          <DialogTitle>{stock.productName}</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
         <Label>回収/廃棄日付</Label>
-        <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+        <Popover
+          modal={true}
+          open={datePickerOpen}
+          onOpenChange={setDatePickerOpen}
+        >
           <PopoverTrigger asChild>
             <Button
               variant={"outline"}

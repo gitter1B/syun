@@ -16,6 +16,35 @@ export const getSheets = async (): Promise<sheets_v4.Sheets> => {
   return sheets;
 };
 
+export const getTables = async (
+  ranges: string[]
+): Promise<sheets_v4.Schema$ValueRange[]> => {
+  const sheets: sheets_v4.Sheets = await getSheets();
+  const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+
+  if (!spreadsheetId) {
+    console.error("Spreadsheet ID is undefined");
+    return [];
+  }
+
+  try {
+    const response = await sheets.spreadsheets.values.batchGet({
+      spreadsheetId: spreadsheetId,
+      ranges,
+    });
+
+    const data: sheets_v4.Schema$ValueRange[] | undefined =
+      response.data.valueRanges;
+    if (!data) {
+      return [];
+    }
+    return data;
+  } catch (error: unknown) {
+    console.error((error as Error).message);
+    return [];
+  }
+};
+
 export const appendValues = async (
   sheets: sheets_v4.Sheets,
   spreadsheetId: string | undefined,

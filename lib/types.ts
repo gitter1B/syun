@@ -85,6 +85,10 @@ export type Stock = {
   quantity: number;
 };
 
+export type StockItem = Stock & {
+  productName: string;
+};
+
 export type NavItem = {
   label: string;
   href: string;
