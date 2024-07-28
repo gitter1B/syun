@@ -38,7 +38,7 @@ export default async function ShipmentPage({
         <ShipmentHeader
           shipments={shipments}
           stores={stores}
-          products={products}
+          products={sortedProducts}
           date={date}
         />
         <Suspense fallback={<p>loading</p>}>
