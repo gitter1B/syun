@@ -69,7 +69,7 @@ export default async function SalesDetailsModalPage({
 
   const selectStoreIds: string[] = [
     ...new Set(filteredData.map((item) => item.storeId)),
-  ].sort((a, b) => Number(a) - Number(b));
+  ].toSorted((a, b) => Number(a) - Number(b));
 
   const selectStores: Store[] = selectStoreIds
     .map((storeId) => stores?.find((s) => s.id === storeId))

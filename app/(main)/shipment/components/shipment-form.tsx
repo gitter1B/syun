@@ -60,6 +60,7 @@ export function ShipmentForm({ products }: Props) {
         format(new Date(), "yyyy-MM-dd", { timeZone: "Asia/Tokyo" })) as string;
       const storeId = (searchParams.get("storeId") || "1") as string;
       await addShipment(values, date, storeId);
+      form.setFocus("unitPrice");
       form.reset({
         product: form.getValues("product"),
         unitPrice: "",

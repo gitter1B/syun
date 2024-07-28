@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { ShipmentItem } from "@/lib/types";
 import { DeleteIcon, Loader2Icon } from "lucide-react";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 type Props = {
   shipmentItem: ShipmentItem;
@@ -23,10 +24,11 @@ export const ShipmentDeleteDialog = ({ shipmentItem }: Props) => {
   const { date, storeName, productName, unitPrice, quantity } = shipmentItem;
   const [year, month, day] = date.split("-");
   const formatDate = `${year}年${month}月${day}日`;
-
   const [isPending, startTransition] = useTransition();
+  const [open, setOpen] = useState<boolean>(false);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="flex items-center cursor-pointer p-2 w-full">
         <DeleteIcon size={20} className="mr-2" />
         削除
@@ -53,7 +55,15 @@ export const ShipmentDeleteDialog = ({ shipmentItem }: Props) => {
           <Button
             onClick={() => {
               startTransition(async () => {
-                await deleteShipment(shipmentItem.id);
+                const { status, message }: { status: string; message: string } =
+                  await deleteShipment(shipmentItem.id);
+                if (status === "success") {
+                  setOpen(false);
+                  toast.success(message);
+                }
+                if (status === "error") {
+                  toast.error(message);
+                }
               });
             }}
             disabled={isPending}

@@ -33,18 +33,14 @@ import { Product, ShipmentItem, Store } from "@/lib/types";
 import { Check, ChevronsUpDown, Loader2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { updateShipment } from "@/actions/shipment";
-import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 type Props = {
   shipmentItem: ShipmentItem;
   products: Product[];
-  dialogClose: () => void;
+  onSuccess?: () => void;
 };
-export function ShipmentEditForm({
-  shipmentItem,
-  products,
-  dialogClose,
-}: Props) {
+export function ShipmentEditForm({ shipmentItem, products, onSuccess }: Props) {
   const { id, date, storeId, productId, unitPrice, quantity } = shipmentItem;
 
   const form = useForm<z.infer<typeof ShipmentSchema>>({
@@ -61,8 +57,15 @@ export function ShipmentEditForm({
 
   function onSubmit(values: z.infer<typeof ShipmentSchema>) {
     startTransition(async () => {
-      await updateShipment(values, id, date, storeId);
-      dialogClose();
+      const { status, message }: { status: string; message: string } =
+        await updateShipment(values, id, date, storeId);
+      if (status === "success") {
+        onSuccess?.();
+        toast.success(message);
+      }
+      if (status === "error") {
+        toast.error(message);
+      }
     });
   }
 
