@@ -4,6 +4,7 @@ import {
   convertSales,
   convertShipments,
   convertStores,
+  convertSyunToSales,
   convertWastes,
 } from "@/lib/convert-data";
 import { getSheets, getTables } from "@/lib/sheet";
@@ -14,9 +15,11 @@ import {
   Stock,
   StockItem,
   Store,
+  SyunSales,
   Waste,
 } from "@/lib/types";
 import { sheets_v4 } from "googleapis";
+import { getTodaySyunSalesData } from "./sales";
 
 export const getAllStocks = async (
   shipments: Shipment[],
@@ -81,10 +84,28 @@ export const getStocks = async (
   if (!data) {
     return [];
   }
+  const { todaySyunSalesData }: { todaySyunSalesData: SyunSales[] } =
+    await getTodaySyunSalesData();
+
   const products: Product[] = await convertProducts(data[0].values);
+  const stores: Store[] = await convertStores(data[1].values);
   const shipments: Shipment[] = await convertShipments(data[2].values);
   const salesData: Sales[] = await convertSales(data[3].values);
+  const todaySalesData: Sales[] = await convertSyunToSales(
+    salesData,
+    todaySyunSalesData,
+    products,
+    stores
+  );
   const wastes: Waste[] = await convertWastes(data[4].values);
+
+  const todayDate: string = todaySalesData.at(0)?.date || "";
+  const isTodayIncluded: boolean = salesData
+    .map((item) => item.date)
+    .includes(todayDate);
+  const conbinedSalesData: Sales[] = isTodayIncluded
+    ? salesData
+    : [...salesData, ...todaySalesData];
 
   const oldestDate: string = "2024-01-05";
 
@@ -92,7 +113,7 @@ export const getStocks = async (
     (item) => new Date(oldestDate).getTime() <= new Date(item.date).getTime()
   );
 
-  const filteredSalesData: Sales[] = salesData.filter(
+  const filteredSalesData: Sales[] = conbinedSalesData.filter(
     (item) => new Date(oldestDate).getTime() <= new Date(item.date).getTime()
   );
 
@@ -104,8 +125,6 @@ export const getStocks = async (
     uniqueShipments.map(async ({ storeId, productId, unitPrice }, index) => {
       const productName: string =
         products.find((p) => p.id === productId)?.name || "";
-      const storeName: string =
-        products.find((s) => s.id === storeId)?.name || "";
       const shipmentTotalQuantity: number = await getTotalQuantity(
         filteredShipments,
         storeId,

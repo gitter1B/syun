@@ -1,11 +1,4 @@
-import { getAllProducts } from "@/actions/product";
-import { getSalesData, getTodaySyunSalesData } from "@/actions/sales";
-import { getAllStores } from "@/actions/store";
-import { getSheets } from "@/lib/sheet";
-import { Sales, SyunSales } from "@/lib/types";
 import { TodaySalesList } from "../(main)/sales/components/today-sales-list";
-
-export const dynamic = "force-dynamic";
 
 export default async function TestPage() {
   // const todaySyunSales: SyunSales[] = await getTodaySyunSalesData();

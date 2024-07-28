@@ -1,20 +1,7 @@
-import { getAllSales } from "@/actions/sales";
-import { getAllShipments } from "@/actions/shipment";
-import { getAllStocks, getStocks } from "@/actions/stock";
-import { getAllWastes } from "@/actions/waste";
-import { getSheets, getTables } from "@/lib/sheet";
-import {
-  Product,
-  Sales,
-  Shipment,
-  Stock,
-  StockItem,
-  Store,
-  Waste,
-} from "@/lib/types";
+import { getStocks } from "@/actions/stock";
+import { getTables } from "@/lib/sheet";
+import { StockItem, Store } from "@/lib/types";
 import { sheets_v4 } from "googleapis";
-import { getAllProducts } from "@/actions/product";
-import { getAllStores } from "@/actions/store";
 import { StockAccordion } from "./stock-accordion";
 import { StockCard } from "./stock-card";
 import { convertStores } from "@/lib/convert-data";
