@@ -6,37 +6,35 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Stock } from "@/lib/types";
+import { StockItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { StockModal } from "./stock-modal";
 
 type Props = {
-  productName: string;
-  stock: Stock;
+  stock: StockItem;
 };
 
-export const StockCard = ({ productName, stock }: Props) => {
+export const StockCard = ({ stock }: Props) => {
+  const { productName, unitPrice, quantity } = stock;
   return (
-    <Card className={cn(stock.quantity < 0 && "bg-destructive/80")}>
-      <CardHeader>
-        <div className="flex items-center justify-between gap-2">
-          <CardTitle className="truncate">{productName}</CardTitle>
-          {stock.quantity > 0 && (
-            <StockModal productName={productName} stock={stock} />
-          )}
+    <Card
+      className={cn(
+        "grid grid-rows-[32px_32px] gap-4 p-4",
+        quantity < 0 && "bg-destructive text-destructive-foreground"
+      )}
+    >
+      <div className="grid grid-cols-[4fr_1fr] items-center gap-2">
+        <div className="truncate text-[20px] font-semibold">{productName}</div>
+        {quantity > 0 && <StockModal stock={stock} />}
+      </div>
+      <div className="grid grid-cols-2 items-center">
+        <div className="text-xl text-right font-semibold">
+          {unitPrice.toLocaleString()}円
         </div>
-        <CardDescription></CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2">
-          <div className="text-xl text-right font-semibold">
-            {stock.unitPrice.toLocaleString()}円
-          </div>
-          <div className="text-xl text-right font-semibold">
-            {stock.quantity.toLocaleString()}袋
-          </div>
+        <div className="text-xl text-right font-semibold">
+          {quantity.toLocaleString()}袋
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
