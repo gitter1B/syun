@@ -6,12 +6,8 @@ import { getAllProducts, getRecentSortedProducts } from "@/actions/product";
 import { getAllShipments } from "@/actions/shipment";
 import { ShipmentTable } from "./components/shipment-table";
 import { format } from "date-fns-tz";
-import { ShipmentDatePicker } from "./components/shipment-date-picker";
-import { StoreSelect } from "../components/store-select";
 import { ShipmentForm } from "./components/shipment-form";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
 import { ShipmentHeader } from "./components/shipment-header";
 import { Suspense } from "react";
 
@@ -35,12 +31,12 @@ export default async function ShipmentPage({
   return (
     <div className="flex w-full h-full">
       <div className="flex flex-1 flex-col gap-4">
-        <ShipmentHeader
+        {/* <ShipmentHeader
           shipments={shipments}
           stores={stores}
           products={sortedProducts}
           date={date}
-        />
+        /> */}
         <Suspense fallback={<p>loading</p>}>
           <ShipmentTable
             shipments={shipments}
@@ -51,10 +47,10 @@ export default async function ShipmentPage({
           />
         </Suspense>
       </div>
-      <Separator className="mx-4 hidden xl:block" orientation="vertical" />
+      {/* <Separator className="mx-4 hidden xl:block" orientation="vertical" />
       <div className="hidden xl:block">
         <ShipmentForm products={sortedProducts} />
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -46,7 +46,7 @@ export const ShipmentTable = async ({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="whitespace-nowrap">商品ID</TableHead>
+          <TableHead className="whitespace-nowrap">商品</TableHead>
           <TableHead className="text-right whitespace-nowrap">単価</TableHead>
           <TableHead className="text-right whitespace-nowrap">出荷数</TableHead>
           <TableHead className="w-1/6"></TableHead>

@@ -159,7 +159,7 @@ export const getStocks = async (
       };
     })
   );
-  return newStocks;
+  return newStocks.filter((stock) => stock.quantity !== 0);
 };
 export const getTotalQuantity = async (
   data: Shipment[] | Sales[] | Waste[],

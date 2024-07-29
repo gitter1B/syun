@@ -60,10 +60,15 @@ export const StockModal = ({ stock }: Props) => {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant={"outline"}>
-          <PackageXIcon className="mr-2" size={20} />
-          <span className="font-semibold">回/廃</span>
-        </Button>
+        <div className="w-full">
+          <Button variant={"outline"} className="hidden sm:inline-flex">
+            <PackageXIcon className="mr-2" size={20} />
+            <span className="font-semibold">回収/廃棄</span>
+          </Button>
+          <Button variant={"outline"} size={"icon"} className="sm:hidden">
+            <PackageXIcon size={20} />
+          </Button>
+        </div>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
