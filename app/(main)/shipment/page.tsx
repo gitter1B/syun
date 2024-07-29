@@ -6,8 +6,6 @@ import { getAllProducts, getRecentSortedProducts } from "@/actions/product";
 import { getAllShipments } from "@/actions/shipment";
 import { ShipmentTable } from "./components/shipment-table";
 import { format } from "date-fns-tz";
-import { ShipmentForm } from "./components/shipment-form";
-import { Separator } from "@/components/ui/separator";
 import { ShipmentHeader } from "./components/shipment-header";
 import { Suspense } from "react";
 
@@ -31,12 +29,12 @@ export default async function ShipmentPage({
   return (
     <div className="flex w-full h-full">
       <div className="flex flex-1 flex-col gap-4">
-        {/* <ShipmentHeader
+        <ShipmentHeader
           shipments={shipments}
           stores={stores}
           products={sortedProducts}
           date={date}
-        /> */}
+        />
         <Suspense fallback={<p>loading</p>}>
           <ShipmentTable
             shipments={shipments}

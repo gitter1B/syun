@@ -18,7 +18,6 @@ export const UserMenu = () => {
     <DropdownMenu>
       <DropdownMenuTrigger>
         <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" />
           <AvatarFallback>
             <UserIcon />
           </AvatarFallback>
