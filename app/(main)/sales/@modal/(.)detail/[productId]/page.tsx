@@ -81,10 +81,7 @@ export default async function SalesDetailsModalPage({
   return (
     <DetailModal productName={product.name}>
       {month > 0 ? (
-        <MonthSalesChart
-          productName={product.name}
-          chartData={monthChartData}
-        />
+        <MonthSalesChart chartData={monthChartData} />
       ) : (
         <YearSalesChart productName={product.name} chartData={yearChartData} />
       )}
