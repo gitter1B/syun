@@ -8,12 +8,10 @@ import {
   SalesItem,
 } from "@/lib/types";
 import { sheets_v4 } from "googleapis";
-import { format } from "date-fns-tz";
 import * as cheerio from "cheerio";
 import { convertDateTextToDateString } from "@/lib/date";
 import { getSheets } from "@/lib/sheet";
 import { convertProducts, convertStores } from "@/lib/convert-data";
-import { getAllProducts } from "./product";
 
 export const getAllSales = async (
   sheets: sheets_v4.Sheets
@@ -260,4 +258,13 @@ export const getTodaySyunSalesData = async (): Promise<{
     }
   });
   return { header, todaySyunSalesData };
+};
+
+export const getSalesTotalPrice = async (
+  salesData: SalesItem[]
+): Promise<number> => {
+  return salesData.reduce(
+    (prev, cur) => prev + cur.unitPrice * cur.quantity,
+    0
+  );
 };
