@@ -24,12 +24,16 @@ type Props = {
 export const ShipmentHeader = ({ shipments, stores, products }: Props) => {
   const [formOpen, setFormOpen] = useState<boolean>(false);
 
+  const existDates: Date[] = [
+    ...new Set(shipments.map((item) => item.date)),
+  ].map((item) => new Date(item));
+
   return (
     <div>
       <div className="flex justify-between gap-4">
         <div className="flex gap-4">
           <ShipmentStoreSelect stores={stores} shipments={shipments} />
-          <ShipmentDatePicker shipments={shipments} />
+          <ShipmentDatePicker existDates={existDates} />
         </div>
         <Button
           variant={"secondary"}

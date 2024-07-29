@@ -17,16 +17,15 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Shipment } from "@/lib/types";
 
 type Props = {
-  shipments: Shipment[];
+  existDates: Date[];
 };
 
-export function ShipmentDatePicker({ shipments }: Props) {
+export function ShipmentDatePicker({ existDates }: Props) {
   const searchParams = useSearchParams();
   const selectedDate = new Date(
     searchParams.get("date") ||
       (format(new Date(), "yyyy-MM-dd", { timeZone: "Asia/Tokyo" }) as string)
   );
-  const existDates: Date[] = shipments.map((item) => new Date(item.date));
   const [date, setDate] = React.useState<Date>(selectedDate);
   const [open, setOpen] = React.useState<boolean>(false);
   const router = useRouter();
@@ -57,7 +56,7 @@ export function ShipmentDatePicker({ shipments }: Props) {
           defaultMonth={date}
           modifiers={{ exist: existDates }}
           modifiersClassNames={{
-            exist: cn("text-primary border-2 border-primary"),
+            exist: "text-primary border-2 border-primary",
           }}
           onSelect={(value) => {
             if (value) {

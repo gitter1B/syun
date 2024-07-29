@@ -19,21 +19,19 @@ export const StockCard = ({ stock }: Props) => {
   return (
     <Card
       className={cn(
-        "grid grid-rows-[32px_32px] gap-4 p-4",
+        "grid gap-4 p-4",
         quantity < 0 && "bg-destructive text-destructive-foreground"
       )}
     >
-      <div className="grid grid-cols-[4fr_1fr] items-center gap-2">
-        <div className="truncate text-[20px] font-semibold">{productName}</div>
-        {quantity > 0 && <StockModal stock={stock} />}
-      </div>
-      <div className="grid grid-cols-2 items-center">
-        <div className="text-xl text-right font-semibold">
+      <div className="grid grid-cols-[1fr_80px_50px_auto] items-center gap-3">
+        <div className="truncate text-lg font-semibold">{productName}</div>
+        <div className="text-base text-right font-semibold truncate">
           {unitPrice.toLocaleString()}円
         </div>
-        <div className="text-xl text-right font-semibold">
+        <div className="text-base text-right font-semibold truncate">
           {quantity.toLocaleString()}袋
         </div>
+        <div>{quantity < 0 && <StockModal stock={stock} />}</div>
       </div>
     </Card>
   );
