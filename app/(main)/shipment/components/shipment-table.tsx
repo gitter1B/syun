@@ -46,9 +46,9 @@ export const ShipmentTable = async ({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="whitespace-nowrap">商品</TableHead>
-          <TableHead className="text-right whitespace-nowrap">単価</TableHead>
-          <TableHead className="text-right whitespace-nowrap">出荷数</TableHead>
+          <TableHead className="truncate sm:w-1/2">商品</TableHead>
+          <TableHead className="text-right truncate">単価</TableHead>
+          <TableHead className="text-right truncate">出荷数</TableHead>
           <TableHead className="w-1/6"></TableHead>
         </TableRow>
       </TableHeader>
@@ -56,16 +56,16 @@ export const ShipmentTable = async ({
         {[...shipmentData].map((item) => {
           return (
             <TableRow key={item.id}>
-              <TableCell className="text-[16px] font-semibold whitespace-nowrap">
+              <TableCell className="text-[16px] font-semibold">
                 {item.productName}
               </TableCell>
-              <TableCell className="text-right whitespace-nowrap">
+              <TableCell className="text-right truncate">
                 {item.unitPrice.toLocaleString()}円
               </TableCell>
-              <TableCell className="text-right whitespace-nowrap">
+              <TableCell className="text-right truncate">
                 {item.quantity.toLocaleString()}個
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="center">
                 <OverflowMenu shipmentItem={item} products={products} />
               </TableCell>
             </TableRow>

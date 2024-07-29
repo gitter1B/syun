@@ -33,72 +33,65 @@ export const StockTable = async () => {
     existStoreIds.includes(s.id)
   );
   return (
-    <div>
-      <Tabs defaultValue={existStoreIds.at(0)} className="w-full">
-        <TabsList>
-          {existStores.map((store) => {
-            return (
-              <TabsTrigger key={store.id} value={store.id}>
-                {store.name}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-        {existStoreIds.map((storeId) => {
-          console.log(storeId);
+    <Tabs defaultValue={existStoreIds.at(0)}>
+      <TabsList>
+        {existStores.map((store) => {
           return (
-            <TabsContent key={storeId} value={storeId}>
-              <Table className="w-full">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="whitespace-nowrap">商品</TableHead>
-                    <TableHead className="text-right whitespace-nowrap">
-                      単価
-                    </TableHead>
-                    <TableHead className="text-right whitespace-nowrap">
-                      残数
-                    </TableHead>
-                    <TableHead className="w-1/6"></TableHead>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {[...stocks]
-                    .filter((stock) => stock.storeId === storeId)
-                    .map((stock) => {
-                      const { id, productName, unitPrice, quantity } = stock;
-                      return (
-                        quantity !== 0 && (
-                          <TableRow
-                            key={id}
-                            className={cn(
-                              "h-[76px]",
-                              quantity < 0 &&
-                                "bg-destructive text-destructive-foreground  hover:bg-destructive/80"
-                            )}
-                          >
-                            <TableCell className="text-[16px] font-semibold whitespace-nowrap">
-                              {productName}
-                            </TableCell>
-                            <TableCell className="text-right whitespace-nowrap">
-                              {unitPrice.toLocaleString()}円
-                            </TableCell>
-                            <TableCell className="text-right whitespace-nowrap">
-                              {quantity.toLocaleString()}個
-                            </TableCell>
-                            <TableCell align="center">
-                              {quantity > 0 && <StockModal stock={stock} />}
-                            </TableCell>
-                          </TableRow>
-                        )
-                      );
-                    })}
-                </TableBody>
-              </Table>
-            </TabsContent>
+            <TabsTrigger key={store.id} value={store.id}>
+              {store.name}
+            </TabsTrigger>
           );
         })}
-      </Tabs>
-    </div>
+      </TabsList>
+      {existStoreIds.map((storeId) => {
+        return (
+          <TabsContent key={storeId} value={storeId}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="truncate sm:w-1/2">商品</TableHead>
+                  <TableHead className="text-right truncate">単価</TableHead>
+                  <TableHead className="text-right truncate">残数</TableHead>
+                  <TableHead className="w-1/6"></TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {[...stocks]
+                  .filter((stock) => stock.storeId === storeId)
+                  .map((stock) => {
+                    const { id, productName, unitPrice, quantity } = stock;
+                    return (
+                      quantity !== 0 && (
+                        <TableRow
+                          key={id}
+                          className={cn(
+                            "h-[76px]",
+                            quantity < 0 &&
+                              "bg-destructive text-destructive-foreground  hover:bg-destructive/80"
+                          )}
+                        >
+                          <TableCell className="text-[16px] font-semibold">
+                            {productName}
+                          </TableCell>
+                          <TableCell className="text-right truncate">
+                            {unitPrice.toLocaleString()}円
+                          </TableCell>
+                          <TableCell className="text-right truncate">
+                            {quantity.toLocaleString()}個
+                          </TableCell>
+                          <TableCell align="center">
+                            {quantity > 0 && <StockModal stock={stock} />}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    );
+                  })}
+              </TableBody>
+            </Table>
+          </TabsContent>
+        );
+      })}
+    </Tabs>
   );
 };
