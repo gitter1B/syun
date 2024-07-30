@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns-tz";
+import { format, formatInTimeZone } from "date-fns-tz";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -24,7 +24,7 @@ export function ShipmentDatePicker({ existDates }: Props) {
   const searchParams = useSearchParams();
   const selectedDate = new Date(
     searchParams.get("date") ||
-      (format(new Date(), "yyyy-MM-dd", { timeZone: "Asia/Tokyo" }) as string)
+      (formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd") as string)
   );
   const [date, setDate] = React.useState<Date>(selectedDate);
   const [open, setOpen] = React.useState<boolean>(false);

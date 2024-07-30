@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Shipment, Store } from "@/lib/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { format } from "date-fns-tz";
+import { format, formatInTimeZone } from "date-fns-tz";
 
 type Props = {
   stores: Store[];
@@ -23,7 +23,7 @@ type Props = {
 export function ShipmentStoreSelect({ stores, shipments }: Props) {
   const searchParams = useSearchParams();
   const date = (searchParams.get("date") ||
-    format(new Date(), "yyyy-MM-dd", { timeZone: "Asia/Tokyo" })) as string;
+    formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) as string;
   const filteredShipments: Shipment[] = shipments.filter(
     (item) => item.date === date
   );

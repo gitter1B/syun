@@ -2,7 +2,7 @@
 import { appendValues, getSheets, rowDelete, rowUpdate } from "@/lib/sheet";
 import { Product, Stock, Store, Waste, WasteItem } from "@/lib/types";
 import { WasteSchema } from "@/schemas";
-import { format } from "date-fns-tz";
+import { formatInTimeZone } from "date-fns-tz";
 import { sheets_v4 } from "googleapis";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -179,9 +179,7 @@ export const updateWaste = async (
   const updateValues: string[][] = [
     [
       wasteId,
-      format(date, "yyyy-MM-dd", {
-        timeZone: "Asia/Tokyo",
-      }),
+      formatInTimeZone(date, "Asia/Tokyo", "yyyy-MM-dd"),
       waste.productId,
       waste.unitPrice.toString(),
       quantity.toString(),

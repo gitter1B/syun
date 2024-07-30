@@ -5,7 +5,7 @@ import { getAllStores } from "@/actions/store";
 import { getAllProducts, getRecentSortedProducts } from "@/actions/product";
 import { getAllShipments } from "@/actions/shipment";
 import { ShipmentTable } from "./components/shipment-table";
-import { format } from "date-fns-tz";
+import { format, formatInTimeZone } from "date-fns-tz";
 import { ShipmentHeader } from "./components/shipment-header";
 import { Suspense } from "react";
 
@@ -15,7 +15,7 @@ export default async function ShipmentPage({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const date = (searchParams.date ||
-    format(new Date(), "yyyy-MM-dd", { timeZone: "Asia/Tokyo" })) as string;
+    formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) as string;
   const storeId = (searchParams.storeId || "1") as string;
   const sheets: sheets_v4.Sheets = await getSheets();
   const stores: Store[] = await getAllStores(sheets);
