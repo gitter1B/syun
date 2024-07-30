@@ -53,6 +53,7 @@ export function ShipmentForm({ products }: Props) {
 
   const [isPending, startTransition] = useTransition();
   const [productOpen, setProductOpen] = useState<boolean>(false);
+  const [productQuery, setProductQuery] = useState<string>("");
 
   function onSubmit(values: z.infer<typeof ShipmentSchema>) {
     startTransition(async () => {
@@ -60,12 +61,13 @@ export function ShipmentForm({ products }: Props) {
         formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) as string;
       const storeId = (searchParams.get("storeId") || "1") as string;
       await addShipment(values, date, storeId);
-      form.setFocus("unitPrice");
       form.reset({
         product: form.getValues("product"),
         unitPrice: "",
         quantity: "",
       });
+      setProductQuery("");
+      setProductOpen(true);
     });
   }
 
@@ -105,36 +107,45 @@ export function ShipmentForm({ products }: Props) {
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-full max-w-96 p-0" align="start">
-                    <Command>
+                    <Command defaultValue={field.value}>
                       <CommandInput
                         className="text-[16px]"
                         placeholder="商品を検索"
+                        value={productQuery}
+                        onValueChange={setProductQuery}
                       />
                       <CommandEmpty>商品が見つかりませんでした。</CommandEmpty>
                       <CommandList>
                         <CommandGroup>
-                          {products.map((product) => (
-                            <CommandItem
-                              value={product.id + product.name}
-                              key={product.id}
-                              onSelect={() => {
-                                form.setValue("product", product.id);
-                                setProductOpen(false);
-                              }}
-                              className="whitespace-nowrap"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  product.id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              <span className="mr-2 w-12">{product.id}</span>
-                              {product.name}
-                            </CommandItem>
-                          ))}
+                          {products
+                            .filter(
+                              (p) =>
+                                p.id.includes(productQuery) ||
+                                p.name.includes(productQuery)
+                            )
+                            .map((product) => (
+                              <CommandItem
+                                value={product.id}
+                                key={product.id}
+                                onSelect={() => {
+                                  form.setValue("product", product.id);
+                                  setProductOpen(false);
+                                  form.setFocus("unitPrice");
+                                }}
+                                className="whitespace-nowrap"
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    product.id === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                <span className="mr-2 w-12">{product.id}</span>
+                                {product.name}
+                              </CommandItem>
+                            ))}
                         </CommandGroup>
                       </CommandList>
                     </Command>
