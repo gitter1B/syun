@@ -8,6 +8,8 @@ import { ShipmentTable } from "./components/shipment-table";
 import { format, formatInTimeZone } from "date-fns-tz";
 import { ShipmentHeader } from "./components/shipment-header";
 import { Suspense } from "react";
+import { Separator } from "@/components/ui/separator";
+import { ShipmentForm } from "./components/shipment-form";
 
 export default async function ShipmentPage({
   searchParams,
@@ -45,10 +47,10 @@ export default async function ShipmentPage({
           />
         </Suspense>
       </div>
-      {/* <Separator className="mx-4 hidden xl:block" orientation="vertical" />
+      <Separator className="mx-4 hidden xl:block" orientation="vertical" />
       <div className="hidden xl:block">
         <ShipmentForm products={sortedProducts} />
-      </div> */}
+      </div>
     </div>
   );
 }
