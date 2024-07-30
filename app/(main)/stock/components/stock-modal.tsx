@@ -15,7 +15,7 @@ import { Stock, StockItem } from "@/lib/types";
 import { Loader2Icon, PackageXIcon } from "lucide-react";
 import { ChangeEvent, MouseEvent, useState, useTransition } from "react";
 import * as React from "react";
-import { format } from "date-fns-tz";
+import { format, formatInTimeZone } from "date-fns-tz";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ type Props = {
 export const StockModal = ({ stock }: Props) => {
   const [open, setOpen] = useState<boolean>(false);
   const [date, setDate] = React.useState<Date | undefined>(
-    new Date(format(new Date(), "yyyy-MM-dd", { timeZone: "Asia/Tokyo" }))
+    new Date(formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd"))
   );
   const [quantity, setQuantity] = useState<string>("1");
   const [datePickerOpen, setDatePickerOpen] = useState<boolean>(false);

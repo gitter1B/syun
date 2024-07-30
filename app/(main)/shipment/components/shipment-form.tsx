@@ -34,7 +34,7 @@ import { Check, ChevronsUpDown, Loader2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { addShipment } from "@/actions/shipment";
 import { useSearchParams } from "next/navigation";
-import { format } from "date-fns-tz";
+import { format, formatInTimeZone } from "date-fns-tz";
 
 type Props = {
   products: Product[];
@@ -57,7 +57,7 @@ export function ShipmentForm({ products }: Props) {
   function onSubmit(values: z.infer<typeof ShipmentSchema>) {
     startTransition(async () => {
       const date = (searchParams.get("date") ||
-        format(new Date(), "yyyy-MM-dd", { timeZone: "Asia/Tokyo" })) as string;
+        formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) as string;
       const storeId = (searchParams.get("storeId") || "1") as string;
       await addShipment(values, date, storeId);
       form.setFocus("unitPrice");

@@ -145,41 +145,6 @@ export const getSalesData = async (
   }
 };
 
-// export const getFilteredSalesData = async (
-//   salesData: Sales[],
-//   searchParams: SalesSearchParams,
-//   stores: Store[]
-// ) => {
-//   const thisYear: number = Number(
-//     format(new Date(), "yyyy", {
-//       timeZone: "Asia/Tokyo",
-//     })
-//   );
-//   const years: number[] = Array.from({ length: thisYear - 2020 }).map(
-//     (_, i) => 2021 + i
-//   );
-//   const months: number[] = Array.from({ length: 12 }).map((_, i) => i + 1);
-
-//   const year: number = years.includes(Number(searchParams.year))
-//     ? Number(searchParams.year)
-//     : thisYear;
-//   const month: number = months.includes(Number(searchParams.month))
-//     ? Number(searchParams.month)
-//     : 0;
-//   const storeId: string = stores.map((s) => s.id).includes(searchParams.storeId)
-//     ? searchParams.storeId
-//     : "0";
-
-//   return salesData.filter((item) => {
-//     const date: Date = new Date(item.date);
-//     return (
-//       year === date.getFullYear() &&
-//       (month <= 0 || month === date.getMonth() + 1) &&
-//       (storeId !== "0" ? item.storeId === storeId : true)
-//     );
-//   });
-// };
-
 export const getTotalSalesData = async (
   salesData: SalesItem[]
 ): Promise<TotalSales[]> => {

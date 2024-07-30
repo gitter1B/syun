@@ -1,17 +1,18 @@
 import { TotalPriceCard } from "./components/total-price-card";
 import { SalesItem, StockItem, Store } from "@/lib/types";
 import { getSalesData, getSalesTotalPrice } from "@/actions/sales";
-import { format } from "date-fns-tz";
+import { format, formatInTimeZone } from "date-fns-tz";
 import { getStocks } from "@/actions/stock";
 import { sheets_v4 } from "googleapis";
 import { getTables } from "@/lib/sheet";
 import { convertStores } from "@/lib/convert-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+export const dynamic = "force-dynamic";
+
 export default async function Dashboard() {
-  const today: string = format(new Date(), "yyyy-MM-dd", {
-    timeZone: "Asia/Tokyo",
-  });
+  const now: Date = new Date();
+  const today: string = formatInTimeZone(now, "Asia/Tokyo", "yyyy-MM-dd");
   const [year, month, day] = today.split("-");
   const thisYear: number = Number(year);
   const thisMonth: number = parseInt(month);

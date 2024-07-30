@@ -9,16 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format } from "date-fns-tz";
+import { format, formatInTimeZone } from "date-fns-tz";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   resetPage?: boolean;
 };
 export const YearSelect = ({ resetPage }: Props) => {
-  const thisYear: string = format(new Date(), "yyyy", {
-    timeZone: "Asia/Tokyo",
-  });
+  const thisYear: string = formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy");
   const years: string[] = Array.from({ length: Number(thisYear) - 2021 }).map(
     (_, i) => (2022 + i).toString()
   );

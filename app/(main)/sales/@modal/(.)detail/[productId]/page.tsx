@@ -7,12 +7,7 @@ import { getAllSales } from "@/actions/sales";
 import { DetailList } from "../../../components/detail-list";
 import { YearSalesChart } from "../../../components/year-sales-chart";
 import { getAllStores } from "@/actions/store";
-import { StoreTabs } from "@/app/(main)/components/store-tabs";
-import { DetailsFilter } from "../../../components/details-filter";
-import { YearSelect } from "@/app/(main)/components/year-select";
-import { MonthSelect } from "@/app/(main)/components/month-select";
-import { StoreSelect } from "@/app/(main)/components/store-select";
-import { format } from "date-fns-tz";
+import { formatInTimeZone } from "date-fns-tz";
 import { getMonthChartData, getYearChartData } from "@/lib/date";
 import { MonthSalesChart } from "../../../components/month-sales-chart";
 
@@ -28,9 +23,7 @@ export default async function SalesDetailsModalPage({
   const products: Product[] = await getAllProducts(sheets);
   const stores: Store[] = await getAllStores(sheets);
   const thisYear: number = Number(
-    format(new Date(), "yyyy", {
-      timeZone: "Asia/Tokyo",
-    })
+    formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy")
   );
   const years: number[] = Array.from({ length: thisYear - 2020 }).map(
     (_, i) => 2021 + i
