@@ -1,56 +1,54 @@
 import { TotalPriceCard } from "./components/total-price-card";
-import { SalesItem, StockItem, Store } from "@/lib/types";
-import { getSalesData, getSalesTotalPrice } from "@/actions/sales";
-import { format, formatInTimeZone } from "date-fns-tz";
+import { getSalesTotalPrice } from "@/actions/sales";
+import { Stock } from "@/lib/types";
 import { getStocks } from "@/actions/stock";
-import { sheets_v4 } from "googleapis";
-import { getTables } from "@/lib/sheet";
-import { convertStores } from "@/lib/convert-data";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { getSales } from "@/actions/sales";
+import { getToday } from "@/lib/date";
+import { Sales } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  const now: Date = new Date();
-  const today: string = formatInTimeZone(now, "Asia/Tokyo", "yyyy-MM-dd");
+  const today = await getToday();
   const [year, month, day] = today.split("-");
   const thisYear: number = Number(year);
   const thisMonth: number = parseInt(month);
 
-  const yearSalesData: SalesItem[] = await getSalesData(
-    "all",
+  const yearSalesData: Sales[] = await getSales(
     `${thisYear}-01-01`,
     `${thisYear}-12-31`
   );
 
-  const monthSalesData: SalesItem[] = yearSalesData.filter(
-    (item) =>
+  const monthSalesData: Sales[] = yearSalesData.filter((item) => {
+    return (
       new Date(thisYear, thisMonth - 1, 1).getTime() <=
         new Date(item.date).getTime() &&
-      new Date(item.date).getTime() < new Date(thisYear, thisMonth, 1).getTime()
-  );
-  const todaySalesData: SalesItem[] = yearSalesData.filter(
-    (item) => new Date(today).getTime() === new Date(item.date).getTime()
-  );
-  const yearTotalPrice: number = await getSalesTotalPrice(yearSalesData);
-  const monthTotalPrice: number = await getSalesTotalPrice(monthSalesData);
-  const todayTotalPrice: number = await getSalesTotalPrice(todaySalesData);
+      new Date(item.date).getTime() <=
+        new Date(thisYear, thisMonth, 1).getTime()
+    );
+  });
 
-  const data: sheets_v4.Schema$ValueRange[] | undefined = await getTables([
-    "商品",
-    "店舗",
-    "出荷",
-    "販売",
-    "廃棄",
-  ]);
-  const stocks: StockItem[] = await getStocks(data);
-  const stores: Store[] = await convertStores(data[1].values);
-  const existStoreIds: string[] = [
-    ...new Set(stocks.map((stock) => stock.storeId)),
-  ];
-  const existStores: Store[] = stores.filter((s) =>
-    existStoreIds.includes(s.id)
+  const todaySalesData: Sales[] = yearSalesData.filter(
+    (item) => item.date === today
   );
+
+  const todayTotalPrice: number = await getSalesTotalPrice(todaySalesData);
+  const monthTotalPrice: number = await getSalesTotalPrice(monthSalesData);
+  const yearTotalPrice: number = await getSalesTotalPrice(yearSalesData);
+
+  const stocks: Stock[] = await getStocks();
+  const existStoreItems: { storeId: string; storeName: string }[] = stocks
+    .filter(
+      (item, index, self) =>
+        index === self.findIndex((t) => t.storeId === item.storeId)
+    )
+    .map((item) => ({
+      storeId: item.storeId,
+      storeName: item.storeName!,
+    }))
+    .toSorted((a, b) => Number(a.storeId) - Number(b.storeId));
 
   return (
     <div className="flex flex-col gap-4">
@@ -66,22 +64,22 @@ export default async function Dashboard() {
         <h1 className="text-xl font-semibold mb-2 w-full border-b pb-1">
           残数
         </h1>
-        <Tabs defaultValue={existStoreIds.at(0)} className="w-full">
+        <Tabs defaultValue={existStoreItems.at(0)?.storeId} className="w-full">
           <TabsList>
-            {existStores.map(({ id, name }) => {
+            {existStoreItems.map(({ storeId, storeName }) => {
               return (
-                <TabsTrigger key={id} value={id}>
-                  {name}
+                <TabsTrigger key={storeId} value={storeId}>
+                  {storeName}
                 </TabsTrigger>
               );
             })}
           </TabsList>
-          {existStores.map((store) => {
+          {existStoreItems.map(({ storeId }) => {
             return (
-              <TabsContent key={store.id} value={store.id}>
+              <TabsContent key={storeId} value={storeId}>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {stocks
-                    .filter((stock) => stock.storeId === store.id)
+                    .filter((stock) => stock.storeId === storeId)
                     .map(({ id, productName, unitPrice, quantity }) => {
                       return (
                         <div

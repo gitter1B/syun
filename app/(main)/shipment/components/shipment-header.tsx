@@ -19,7 +19,6 @@ type Props = {
   shipments: Shipment[];
   stores: Store[];
   products: Product[];
-  date: string;
 };
 export const ShipmentHeader = ({ shipments, stores, products }: Props) => {
   const [formOpen, setFormOpen] = useState<boolean>(false);

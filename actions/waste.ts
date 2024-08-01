@@ -1,6 +1,17 @@
 "use server";
-import { appendValues, getSheets, rowDelete, rowUpdate } from "@/lib/sheet";
-import { Product, Stock, Store, Waste, WasteItem } from "@/lib/types";
+import {
+  convertProducts,
+  convertStores,
+  convertWastes,
+} from "@/lib/convert-data";
+import {
+  appendValues,
+  getSheets,
+  getTables,
+  rowDelete,
+  rowUpdate,
+} from "@/lib/sheet";
+import { Product, Stock, Store, Tables, Waste } from "@/lib/types";
 import { WasteSchema } from "@/schemas";
 import { formatInTimeZone } from "date-fns-tz";
 import { sheets_v4 } from "googleapis";
@@ -45,81 +56,45 @@ export const getAllWastes = async (
 };
 
 export const getWastes = async (
-  productId: string | undefined,
-  storeId: string | undefined
-): Promise<WasteItem[]> => {
-  const sheets: sheets_v4.Sheets = await getSheets();
-  const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+  productId?: string,
+  storeId?: string
+): Promise<Waste[]> => {
+  const tables: Tables = await getTables(["商品", "店舗", "廃棄"]);
+  const products: Product[] = await convertProducts(tables["商品"].data);
+  const stores: Store[] = await convertStores(tables["店舗"].data);
+  const wastes: Waste[] = await convertWastes(tables["廃棄"].data);
 
-  if (!spreadsheetId) {
-    console.error("Spreadsheet ID is undefined");
-    return [];
+  let filteredWastes: Waste[] = wastes;
+
+  if (productId) {
+    filteredWastes = filteredWastes.filter((item) =>
+      productId === "all" ? true : item.productId === productId
+    );
   }
 
-  try {
-    const response = await sheets.spreadsheets.values.batchGet({
-      spreadsheetId: spreadsheetId,
-      ranges: ["商品", "店舗", "廃棄"],
-    });
-
-    const data: sheets_v4.Schema$ValueRange[] | undefined =
-      response.data.valueRanges;
-    if (!data) {
-      return [];
-    }
-
-    const products: Product[] = data[0].values
-      ? data[0].values.slice(1).map((row) => {
-          return {
-            id: row[0],
-            name: row[1],
-          };
-        })
-      : [];
-
-    const stores: Store[] = data[1].values
-      ? data[1].values.slice(1).map((row) => {
-          return {
-            id: row[0],
-            name: row[1],
-          };
-        })
-      : [];
-
-    const wastes: WasteItem[] = data[2].values
-      ? data[2].values
-          .slice(1)
-          .filter((row) => {
-            const productCondition: boolean =
-              productId === "all" ? true : row[2] === productId;
-            const storeCondition: boolean =
-              storeId === "all" ? true : row[5] === storeId;
-            return productCondition && storeCondition;
-          })
-          .map((row) => {
-            const product: Product = products.find((p) => p.id === row[2])!;
-            const store: Store = stores.find((s) => s.id === row[5])!;
-
-            return {
-              id: row[0],
-              date: row[1],
-              productId: row[2],
-              unitPrice: Number(row[3]),
-              quantity: Number(row[4]),
-              storeId: row[5],
-              productName: product.name,
-              storeName: store.name,
-            };
-          })
-          .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-          )
-      : [];
-    return wastes;
-  } catch (error: unknown) {
-    console.error((error as Error).message);
-    return [];
+  if (storeId) {
+    filteredWastes = filteredWastes.filter((item) =>
+      storeId === "all" ? true : item.storeId === storeId
+    );
   }
+
+  const resultWastes: Waste[] = filteredWastes
+    .map((item) => {
+      const productName: string =
+        products.find((p) => p.id === item.productId)?.name || "";
+      const storeName: string =
+        stores.find((s) => s.id === item.storeId)?.name || "";
+
+      return {
+        ...item,
+        productName,
+        storeName,
+      };
+    })
+    .toSorted(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  return resultWastes;
 };
 
 export const addWaste = async (

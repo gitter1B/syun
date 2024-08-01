@@ -1,4 +1,9 @@
+import { formatInTimeZone } from "date-fns-tz";
 import { Sales } from "./types";
+
+export const getToday = async (): Promise<string> => {
+  return formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+};
 
 export function getDaysInMonth(year: number, month: number): number[] {
   if (month < 1 || month > 12) {

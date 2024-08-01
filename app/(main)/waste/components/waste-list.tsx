@@ -1,19 +1,19 @@
 import { getWastes } from "@/actions/waste";
-import { WasteItem } from "@/lib/types";
+import { Waste } from "@/lib/types";
 import { WasteCard } from "./waste-card";
-import { Pagination } from "@/components/pagination";
+import { Pagination } from "../../components/pagination";
 
 type Props = {
-  searchParams: { productId: string; storeId: string; page: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 export const WasteList = async ({ searchParams }: Props) => {
-  const productId: string = searchParams.productId || "all";
-  const storeId: string = searchParams.storeId || "all";
+  const productId: string = (searchParams.productId || "all") as string;
+  const storeId: string = (searchParams.storeId || "all") as string;
   const page: number = Number(searchParams.page) || 1;
   const ITEMS_PER_PAGE: number = 12;
   const startPage: number = ITEMS_PER_PAGE * (page - 1);
   const endPage: number = startPage + ITEMS_PER_PAGE;
-  const wastes: WasteItem[] = await getWastes(productId, storeId);
+  const wastes: Waste[] = await getWastes(productId, storeId);
 
   if (wastes.length === 0) {
     return <div>データがありません。</div>;

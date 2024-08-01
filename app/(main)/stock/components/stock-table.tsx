@@ -8,42 +8,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getStocks } from "@/actions/stock";
-import { getTables } from "@/lib/sheet";
-import { StockItem, Store } from "@/lib/types";
-import { sheets_v4 } from "googleapis";
-import { convertStores } from "@/lib/convert-data";
+import { Stock } from "@/lib/types";
 import { StockModal } from "./stock-modal";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const StockTable = async () => {
-  const data: sheets_v4.Schema$ValueRange[] | undefined = await getTables([
-    "商品",
-    "店舗",
-    "出荷",
-    "販売",
-    "廃棄",
-  ]);
-  const stocks: StockItem[] = await getStocks(data);
-  const stores: Store[] = await convertStores(data[1].values);
-  const existStoreIds: string[] = [
-    ...new Set(stocks.map((item) => item.storeId)),
-  ].toSorted((a, b) => Number(a) - Number(b));
-  const existStores: Store[] = stores.filter((s) =>
-    existStoreIds.includes(s.id)
-  );
+  const stocks: Stock[] = await getStocks();
+  const existStoreItems: { storeId: string; storeName: string }[] = stocks
+    .filter(
+      (item, index, self) =>
+        index === self.findIndex((t) => t.storeId === item.storeId)
+    )
+    .map((item) => ({
+      storeId: item.storeId,
+      storeName: item.storeName!,
+    }))
+    .toSorted((a, b) => Number(a.storeId) - Number(b.storeId));
   return (
-    <Tabs defaultValue={existStoreIds.at(0)}>
+    <Tabs defaultValue={existStoreItems.at(0)?.storeId}>
       <TabsList>
-        {existStores.map((store) => {
+        {existStoreItems.map((store) => {
           return (
-            <TabsTrigger key={store.id} value={store.id}>
-              {store.name}
+            <TabsTrigger key={store.storeId} value={store.storeId}>
+              {store.storeName}
             </TabsTrigger>
           );
         })}
       </TabsList>
-      {existStoreIds.map((storeId) => {
+      {existStoreItems.map(({ storeId }) => {
         return (
           <TabsContent key={storeId} value={storeId}>
             <Table>

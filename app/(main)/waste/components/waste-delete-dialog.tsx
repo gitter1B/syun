@@ -10,12 +10,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { WasteItem } from "@/lib/types";
+import { Waste } from "@/lib/types";
 import { Loader2Icon, Trash2Icon } from "lucide-react";
 import { MouseEvent, useState, useTransition } from "react";
 
 type Props = {
-  wasteItem: WasteItem;
+  wasteItem: Waste;
 };
 
 export const WasteDeleteDialog = ({ wasteItem }: Props) => {

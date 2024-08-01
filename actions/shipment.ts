@@ -1,11 +1,48 @@
 "use server";
 
-import { appendValues, getSheets, rowDelete, rowUpdate } from "@/lib/sheet";
-import { Product, Shipment, Store } from "@/lib/types";
+import {
+  convertProducts,
+  convertShipments,
+  convertStores,
+} from "@/lib/convert-data";
+import {
+  appendValues,
+  getSheets,
+  getTables,
+  rowDelete,
+  rowUpdate,
+} from "@/lib/sheet";
+import { Product, Shipment, Store, Tables } from "@/lib/types";
 import { ShipmentSchema } from "@/schemas";
 import { sheets_v4 } from "googleapis";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+
+export const getShipments = async (
+  storeId?: string,
+  date?: string
+): Promise<Shipment[]> => {
+  const tables: Tables = await getTables(["商品", "店舗", "出荷"]);
+  const products: Product[] = await convertProducts(tables["商品"].data);
+  const stores: Store[] = await convertStores(tables["店舗"].data);
+  const shipments: Shipment[] = await convertShipments(tables["出荷"].data);
+
+  return shipments
+    .filter((item) => {
+      return item.date === date && item.storeId === storeId;
+    })
+    .map((item) => {
+      const productName: string =
+        products.find((p) => p.id === item.productId)?.name || "";
+      const storeName: string =
+        stores.find((s) => s.id === item.storeId)?.name || "";
+      return {
+        ...item,
+        productName,
+        storeName,
+      };
+    });
+};
 
 export const getAllShipments = async (
   sheets: sheets_v4.Sheets

@@ -1,5 +1,6 @@
 "use server";
 import { google, sheets_v4 } from "googleapis";
+import { Tables } from "./types";
 
 export const getSheets = async (): Promise<sheets_v4.Sheets> => {
   const privateKey = process.env.PRIVATE_KEY?.replace(/\\n/g, "\n");
@@ -16,34 +17,69 @@ export const getSheets = async (): Promise<sheets_v4.Sheets> => {
   return sheets;
 };
 
-export const getTables = async (
-  ranges: string[]
-): Promise<sheets_v4.Schema$ValueRange[]> => {
+export const getTables = async (ranges: string[]): Promise<Tables> => {
   const sheets: sheets_v4.Sheets = await getSheets();
   const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
 
   if (!spreadsheetId) {
     console.error("Spreadsheet ID is undefined");
-    return [];
+    return {};
   }
 
   try {
     const response = await sheets.spreadsheets.values.batchGet({
-      spreadsheetId: spreadsheetId,
+      spreadsheetId,
       ranges,
     });
 
-    const data: sheets_v4.Schema$ValueRange[] | undefined =
+    const valueRanges: sheets_v4.Schema$ValueRange[] | undefined =
       response.data.valueRanges;
-    if (!data) {
-      return [];
+
+    if (!valueRanges) {
+      return {};
     }
-    return data;
+
+    return Object.fromEntries(
+      ranges.map((name, index) => {
+        const values = valueRanges[index]?.values ?? [];
+        const header = values[0] ?? [];
+        const data = values.slice(1);
+        return [name, { header, data }];
+      })
+    );
   } catch (error: unknown) {
     console.error((error as Error).message);
-    return [];
+    return {};
   }
 };
+// export const getTables = async (
+//   ranges: string[]
+// ): Promise<sheets_v4.Schema$ValueRange[]> => {
+//   const sheets: sheets_v4.Sheets = await getSheets();
+//   const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+
+//   if (!spreadsheetId) {
+//     console.error("Spreadsheet ID is undefined");
+//     return [];
+//   }
+
+//   try {
+//     const response = await sheets.spreadsheets.values.batchGet({
+//       spreadsheetId: spreadsheetId,
+//       ranges,
+//     });
+
+//     const data: sheets_v4.Schema$ValueRange[] | undefined =
+//       response.data.valueRanges;
+//     if (!data) {
+//       return [];
+//     }
+//     return data;
+//   } catch (error: unknown) {
+//     console.error((error as Error).message);
+//     return [];
+//   }
+// };
 
 export const appendValues = async (
   sheets: sheets_v4.Sheets,

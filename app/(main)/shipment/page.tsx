@@ -1,28 +1,26 @@
-import { getSheets } from "@/lib/sheet";
-import { Product, Shipment, ShipmentItem, Store } from "@/lib/types";
-import { sheets_v4 } from "googleapis";
-import { getAllStores } from "@/actions/store";
-import { getAllProducts, getRecentSortedProducts } from "@/actions/product";
-import { getAllShipments } from "@/actions/shipment";
+import { getTables } from "@/lib/sheet";
+import { Product, Shipment, Store, Tables } from "@/lib/types";
+import { getRecentSortedProducts } from "@/actions/product";
 import { ShipmentTable } from "./components/shipment-table";
-import { format, formatInTimeZone } from "date-fns-tz";
 import { ShipmentHeader } from "./components/shipment-header";
 import { Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
 import { ShipmentForm } from "./components/shipment-form";
+import {
+  convertProducts,
+  convertShipments,
+  convertStores,
+} from "@/lib/convert-data";
 
 export default async function ShipmentPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const date = (searchParams.date ||
-    formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) as string;
-  const storeId = (searchParams.storeId || "1") as string;
-  const sheets: sheets_v4.Sheets = await getSheets();
-  const stores: Store[] = await getAllStores(sheets);
-  const products: Product[] = await getAllProducts(sheets);
-  const shipments: Shipment[] = await getAllShipments(sheets);
+  const tables: Tables = await getTables(["商品", "店舗", "出荷"]);
+  const products: Product[] = await convertProducts(tables["商品"].data);
+  const stores: Store[] = await convertStores(tables["店舗"].data);
+  const shipments: Shipment[] = await convertShipments(tables["出荷"].data);
   const sortedProducts: Product[] = await getRecentSortedProducts(
     shipments,
     products
@@ -35,16 +33,12 @@ export default async function ShipmentPage({
           shipments={shipments}
           stores={stores}
           products={sortedProducts}
-          date={date}
         />
-        <Suspense fallback={<p>loading</p>}>
-          <ShipmentTable
-            shipments={shipments}
-            products={products}
-            stores={stores}
-            date={date}
-            storeId={storeId}
-          />
+        <Suspense
+          key={JSON.stringify(searchParams)}
+          fallback={<p>loading...</p>}
+        >
+          <ShipmentTable searchParams={searchParams} />
         </Suspense>
       </div>
       <Separator className="mx-4 hidden xl:block" orientation="vertical" />

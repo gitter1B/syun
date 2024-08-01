@@ -7,97 +7,44 @@ import {
   convertSyunToSales,
   convertWastes,
 } from "@/lib/convert-data";
-import { getSheets, getTables } from "@/lib/sheet";
+import { getTables } from "@/lib/sheet";
 import {
   Product,
   Sales,
   Shipment,
   Stock,
-  StockItem,
   Store,
   SyunSales,
+  Tables,
   Waste,
 } from "@/lib/types";
-import { sheets_v4 } from "googleapis";
 import { getTodaySyunSalesData } from "./sales";
 
-export const getAllStocks = async (
-  shipments: Shipment[],
-  salesData: Sales[],
-  wastes: Waste[]
-): Promise<Stock[]> => {
-  const oldestDate: string = "2024-01-05";
-
-  const filteredShipments: Shipment[] = shipments.filter(
-    (item) => new Date(oldestDate).getTime() <= new Date(item.date).getTime()
-  );
-
-  const filteredSalesData: Sales[] = salesData.filter(
-    (item) => new Date(oldestDate).getTime() <= new Date(item.date).getTime()
-  );
-
-  const uniqueShipments: Shipment[] = await getUniqueShipments(
-    filteredShipments
-  );
-
-  const newStocks: Stock[] = await Promise.all(
-    uniqueShipments.map(async ({ storeId, productId, unitPrice }, index) => {
-      const shipmentTotalQuantity: number = await getTotalQuantity(
-        filteredShipments,
-        storeId,
-        productId,
-        unitPrice
-      );
-
-      const salesTotalQuantity: number = await getTotalQuantity(
-        filteredSalesData,
-        storeId,
-        productId,
-        unitPrice
-      );
-
-      const wasteTotalQuantity: number = await getTotalQuantity(
-        wastes,
-        storeId,
-        productId,
-        unitPrice
-      );
-
-      const totalQuantity: number =
-        shipmentTotalQuantity - salesTotalQuantity - wasteTotalQuantity;
-
-      return {
-        id: (index + 1).toString(),
-        storeId: storeId,
-        productId: productId,
-        unitPrice: unitPrice,
-        quantity: totalQuantity,
-      };
-    })
-  );
-  return newStocks;
-};
-
-export const getStocks = async (
-  data: sheets_v4.Schema$ValueRange[] | undefined
-): Promise<StockItem[]> => {
-  if (!data) {
+export const getStocks = async (): Promise<Stock[]> => {
+  const tables: Tables = await getTables([
+    "商品",
+    "店舗",
+    "出荷",
+    "販売",
+    "廃棄",
+  ]);
+  if (!tables) {
     return [];
   }
   const { todaySyunSalesData }: { todaySyunSalesData: SyunSales[] } =
     await getTodaySyunSalesData();
 
-  const products: Product[] = await convertProducts(data[0].values);
-  const stores: Store[] = await convertStores(data[1].values);
-  const shipments: Shipment[] = await convertShipments(data[2].values);
-  const salesData: Sales[] = await convertSales(data[3].values);
+  const products: Product[] = await convertProducts(tables["商品"].data);
+  const stores: Store[] = await convertStores(tables["店舗"].data);
+  const shipments: Shipment[] = await convertShipments(tables["出荷"].data);
+  const salesData: Sales[] = await convertSales(tables["販売"].data);
   const todaySalesData: Sales[] = await convertSyunToSales(
     salesData,
     todaySyunSalesData,
     products,
     stores
   );
-  const wastes: Waste[] = await convertWastes(data[4].values);
+  const wastes: Waste[] = await convertWastes(tables["廃棄"].data);
 
   const todayDate: string = todaySalesData.at(0)?.date || "";
   const isTodayIncluded: boolean = salesData
@@ -121,10 +68,12 @@ export const getStocks = async (
     filteredShipments
   );
 
-  const newStocks: StockItem[] = await Promise.all(
+  const newStocks: Stock[] = await Promise.all(
     uniqueShipments.map(async ({ storeId, productId, unitPrice }, index) => {
       const productName: string =
         products.find((p) => p.id === productId)?.name || "";
+      const storeName: string =
+        stores.find((s) => s.id === storeId)?.name || "";
       const shipmentTotalQuantity: number = await getTotalQuantity(
         filteredShipments,
         storeId,
@@ -156,11 +105,13 @@ export const getStocks = async (
         unitPrice: unitPrice,
         quantity: totalQuantity,
         productName: productName,
+        storeName: storeName,
       };
     })
   );
   return newStocks.filter((stock) => stock.quantity !== 0);
 };
+
 export const getTotalQuantity = async (
   data: Shipment[] | Sales[] | Waste[],
   storeId: string,

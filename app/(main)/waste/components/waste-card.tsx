@@ -6,12 +6,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { WasteItem } from "@/lib/types";
+import { Waste } from "@/lib/types";
 import { format } from "date-fns";
 import { WasteUpdateMenu } from "./waste-update-menu";
 
 type Props = {
-  wasteItem: WasteItem;
+  wasteItem: Waste;
 };
 
 export const WasteCard = ({ wasteItem }: Props) => {
