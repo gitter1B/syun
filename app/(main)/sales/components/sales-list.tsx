@@ -4,6 +4,7 @@ import { getSales, getTotalSalesData } from "@/actions/sales";
 import { TotalPrice } from "./total-price";
 import { getToday } from "@/lib/date";
 import { Pagination } from "../../components/pagination";
+import { TodaySalesCard } from "./today-sales-card";
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -14,6 +15,9 @@ export const SalesList = async ({ searchParams }: Props) => {
   const to: string = (searchParams.to || today) as string;
   const storeId: string = (searchParams.storeId || "all") as string;
   const salesData: Sales[] = await getSales(from, to, storeId);
+  const storeNames: (string | undefined)[] = [
+    ...new Set(salesData.map((item) => item.storeName)),
+  ];
 
   const totalSalesData: TotalSales[] = await getTotalSalesData(salesData);
   const page: number = Number(searchParams.page) || 1;
@@ -24,6 +28,32 @@ export const SalesList = async ({ searchParams }: Props) => {
     (prev, cur) => prev + cur.unitPrice * cur.quantity,
     0
   );
+  if (salesData.length === 0) {
+    return <div>データがありません</div>;
+  }
+  if (from === today && to === today) {
+    return storeNames.map((storeName) => {
+      return (
+        <div key={storeName} className="flex flex-col gap-2">
+          <h1 className="truncate text-xl font-semibold">{storeName}</h1>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {salesData
+              .filter((item) => item.storeName === storeName)
+              .map((item) => {
+                return (
+                  <TodaySalesCard
+                    key={JSON.stringify(item)}
+                    productName={item.productName!}
+                    quantity={item.quantity}
+                    price={item.unitPrice}
+                  />
+                );
+              })}
+          </div>
+        </div>
+      );
+    });
+  }
   return (
     <div className="w-full flex flex-col gap-4">
       <TotalPrice totalPrice={totalPrice} />
