@@ -29,19 +29,20 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { ShipmentSchema } from "@/schemas";
-import { Product, ShipmentItem, Store } from "@/lib/types";
+import { Product, Shipment, Store } from "@/lib/types";
 import { Check, ChevronsUpDown, Loader2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { updateShipment } from "@/actions/shipment";
 import { toast } from "sonner";
 
 type Props = {
-  shipmentItem: ShipmentItem;
-  products: Product[];
+  // shipmentItem: Shipment;
+  shipment: Shipment;
+  // products: Product[];
   onSuccess?: () => void;
 };
-export function ShipmentEditForm({ shipmentItem, products, onSuccess }: Props) {
-  const { id, date, storeId, productId, unitPrice, quantity } = shipmentItem;
+export function ShipmentEditForm({ shipment, onSuccess }: Props) {
+  const { id, date, storeId, productId, unitPrice, quantity } = shipment;
 
   const form = useForm<z.infer<typeof ShipmentSchema>>({
     resolver: zodResolver(ShipmentSchema),
@@ -73,7 +74,7 @@ export function ShipmentEditForm({ shipmentItem, products, onSuccess }: Props) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-auto">
         <div className="space-y-4">
-          <FormField
+          {/* <FormField
             control={form.control}
             name="product"
             render={({ field }) => (
@@ -142,7 +143,7 @@ export function ShipmentEditForm({ shipmentItem, products, onSuccess }: Props) {
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
           <FormField
             control={form.control}
             name="unitPrice"

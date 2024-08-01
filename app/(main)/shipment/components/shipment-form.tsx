@@ -187,11 +187,7 @@ export function ShipmentForm({ products }: Props) {
           />
         </div>
         <div className="flex justify-end mt-4 md:mt-6">
-          <Button
-            type="submit"
-            className="md:w-full text-base"
-            disabled={isPending}
-          >
+          <Button type="submit" className="text-base" disabled={isPending}>
             {isPending && <Loader2Icon className="animate-spin mr-2" />}
             登録する
           </Button>

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Stock, StockItem } from "@/lib/types";
+import { Stock } from "@/lib/types";
 import { Loader2Icon, PackageXIcon } from "lucide-react";
 import { ChangeEvent, MouseEvent, useState, useTransition } from "react";
 import * as React from "react";
@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/popover";
 
 type Props = {
-  stock: StockItem;
+  stock: Stock;
 };
 export const StockModal = ({ stock }: Props) => {
   const [open, setOpen] = useState<boolean>(false);

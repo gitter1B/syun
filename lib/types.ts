@@ -21,6 +21,8 @@ export type Shipment = {
   unitPrice: number;
   quantity: number;
   storeId: string;
+  productName?: string;
+  storeName?: string;
 };
 
 export type Sales = {
@@ -30,11 +32,13 @@ export type Sales = {
   unitPrice: number;
   quantity: number;
   storeId: string;
+  productName?: string;
+  storeName?: string;
 };
 
-export type SalesItem = Sales & {
-  productName: string;
-};
+// export type SalesItem = Sales & {
+//   productName: string;
+// };
 
 export type TotalSales = {
   productId: string;
@@ -58,10 +62,10 @@ export type SyunSales = {
 //   page: string;
 // };
 
-export type ShipmentItem = Shipment & {
-  storeName: string;
-  productName: string;
-};
+// export type ShipmentItem = Shipment & {
+//   storeName: string;
+//   productName: string;
+// };
 
 export type Waste = {
   id: string;
@@ -70,12 +74,14 @@ export type Waste = {
   productId: string;
   unitPrice: number;
   quantity: number;
+  storeName?: string;
+  productName?: string;
 };
 
-export type WasteItem = Waste & {
-  storeName: string;
-  productName: string;
-};
+// export type WasteItem = Waste & {
+//   storeName: string;
+//   productName: string;
+// };
 
 export type Stock = {
   id: string;
@@ -83,11 +89,13 @@ export type Stock = {
   productId: string;
   unitPrice: number;
   quantity: number;
+  productName?: string;
+  storeName?: string;
 };
 
-export type StockItem = Stock & {
-  productName: string;
-};
+// export type StockItem = Stock & {
+//   productName: string;
+// };
 
 export type NavItem = {
   label: string;
@@ -99,3 +107,5 @@ export type Item = {
   value: string;
   label: string;
 };
+
+export type Tables = { [key: string]: { header: string[]; data: string[][] } };

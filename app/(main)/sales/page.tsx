@@ -1,14 +1,11 @@
 import { Suspense } from "react";
 import { SalesList } from "./components/sales-list";
-import { TodaySalesList } from "./components/today-sales-list";
-import { SalesDateTabs } from "./components/sales-date-tabs";
 import { SalesFilter } from "./components/sales-filter";
-import { DateRangePicker } from "./components/date-range-picker";
 
 export default async function SalesPage({
   searchParams,
 }: {
-  searchParams: { storeId: string; from: string; to: string; page: number };
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -18,12 +15,7 @@ export default async function SalesPage({
           key={JSON.stringify(searchParams)}
           fallback={<p>loading...</p>}
         >
-          {/* <SalesContainer searchParams={searchParams} /> */}
-          {searchParams.from && searchParams.to ? (
-            <SalesList searchParams={searchParams} />
-          ) : (
-            <TodaySalesList />
-          )}
+          <SalesList searchParams={searchParams} />
         </Suspense>
       </div>
     </div>

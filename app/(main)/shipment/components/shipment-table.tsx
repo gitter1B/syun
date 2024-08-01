@@ -7,39 +7,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Product, Shipment, ShipmentItem, Store } from "@/lib/types";
-import { OverflowMenu } from "./overflow-menu";
+import { Shipment } from "@/lib/types";
+import { getShipments } from "@/actions/shipment";
+import { getToday } from "@/lib/date";
+import { ShipmentEditSheet } from "./shipment-edit-sheet";
 
 type Props = {
-  shipments: Shipment[];
-  products: Product[];
-  stores: Store[];
-  date: string;
-  storeId: string;
+  searchParams: { [key: string]: string | string[] | undefined };
 };
-export const ShipmentTable = async ({
-  shipments,
-  products,
-  stores,
-  date,
-  storeId,
-}: Props) => {
-  const shipmentData: ShipmentItem[] = shipments
-    .filter((item) => {
-      return item.date === date && item.storeId === storeId;
-    })
-    .map((item) => {
-      const productName: string =
-        products.find((p) => p.id === item.productId)?.name || "";
-      const storeName: string =
-        stores.find((s) => s.id === item.storeId)?.name || "";
-      return {
-        ...item,
-        productName: productName,
-        storeName: storeName,
-      };
-    });
-  if (shipmentData.length === 0) {
+export const ShipmentTable = async ({ searchParams }: Props) => {
+  const today: string = await getToday();
+  const storeId: string = (searchParams?.storeId || "1") as string;
+  const date: string = (searchParams?.date || today) as string;
+  const shipments: Shipment[] = await getShipments(storeId, date);
+
+  if (shipments.length === 0) {
     return <p>データがありません</p>;
   }
   return (
@@ -53,9 +35,9 @@ export const ShipmentTable = async ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {[...shipmentData].map((item) => {
+        {[...shipments].map((item) => {
           return (
-            <TableRow key={item.id}>
+            <TableRow key={item.id} className="h-[76px]">
               <TableCell className="text-[16px] font-semibold">
                 {item.productName}
               </TableCell>
@@ -66,7 +48,7 @@ export const ShipmentTable = async ({
                 {item.quantity.toLocaleString()}個
               </TableCell>
               <TableCell align="center">
-                <OverflowMenu shipmentItem={item} products={products} />
+                <ShipmentEditSheet shipment={item} />
               </TableCell>
             </TableRow>
           );

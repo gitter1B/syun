@@ -8,14 +8,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EditIcon, Trash2Icon } from "lucide-react";
 import { WasteEditDialog } from "./waste-edit-dialog";
 import { WasteDeleteDialog } from "./waste-delete-dialog";
-import { WasteItem } from "@/lib/types";
+import { Waste } from "@/lib/types";
 import { useState } from "react";
 
 type Props = {
-  wasteItem: WasteItem;
+  wasteItem: Waste;
 };
 
 export const WasteUpdateMenu = ({ wasteItem }: Props) => {

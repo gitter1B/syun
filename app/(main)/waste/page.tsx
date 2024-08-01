@@ -5,7 +5,7 @@ import { WasteList } from "./components/waste-list";
 export default async function WastePage({
   searchParams,
 }: {
-  searchParams: { productId: string; storeId: string; page: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
   return (
     <div className="flex flex-col gap-4">

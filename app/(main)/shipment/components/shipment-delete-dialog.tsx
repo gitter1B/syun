@@ -12,16 +12,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ShipmentItem } from "@/lib/types";
-import { DeleteIcon, Loader2Icon } from "lucide-react";
+import { Shipment } from "@/lib/types";
+import { Loader2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type Props = {
-  shipmentItem: ShipmentItem;
+  shipment: Shipment;
+  onSuccess?: () => void;
 };
-export const ShipmentDeleteDialog = ({ shipmentItem }: Props) => {
-  const { date, storeName, productName, unitPrice, quantity } = shipmentItem;
+export const ShipmentDeleteDialog = ({ shipment, onSuccess }: Props) => {
+  const { date, storeName, productName, unitPrice, quantity } = shipment;
   const [year, month, day] = date.split("-");
   const formatDate = `${year}年${month}月${day}日`;
   const [isPending, startTransition] = useTransition();
@@ -29,9 +30,11 @@ export const ShipmentDeleteDialog = ({ shipmentItem }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="flex items-center cursor-pointer p-2 w-full">
-        <DeleteIcon size={20} className="mr-2" />
-        削除
+      <DialogTrigger
+        className="flex items-center cursor-pointer p-2 w-full"
+        asChild
+      >
+        <Button variant={"outline"}>削除する</Button>
       </DialogTrigger>
 
       <DialogContent>
@@ -56,8 +59,9 @@ export const ShipmentDeleteDialog = ({ shipmentItem }: Props) => {
             onClick={() => {
               startTransition(async () => {
                 const { status, message }: { status: string; message: string } =
-                  await deleteShipment(shipmentItem.id);
+                  await deleteShipment(shipment.id);
                 if (status === "success") {
+                  onSuccess?.();
                   setOpen(false);
                   toast.success(message);
                 }

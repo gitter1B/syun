@@ -5,13 +5,17 @@ import {
   Sales,
   Store,
   TotalSales,
-  SalesItem,
+  Tables,
 } from "@/lib/types";
 import { sheets_v4 } from "googleapis";
 import * as cheerio from "cheerio";
 import { convertDateTextToDateString } from "@/lib/date";
-import { getSheets } from "@/lib/sheet";
-import { convertProducts, convertStores } from "@/lib/convert-data";
+import { getTables } from "@/lib/sheet";
+import {
+  convertProducts,
+  convertShipments,
+  convertSyunToSales,
+} from "@/lib/convert-data";
 
 export const getAllSales = async (
   sheets: sheets_v4.Sheets
@@ -50,112 +54,171 @@ export const getAllSales = async (
   }
 };
 
-export const getSalesData = async (
-  storeId: string,
-  from: string,
-  to: string
-): Promise<SalesItem[]> => {
-  const sheets: sheets_v4.Sheets = await getSheets();
-  const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+export const getSales = async (
+  from?: string,
+  to?: string,
+  storeId?: string
+): Promise<Sales[]> => {
+  const tables: Tables = await getTables(["商品", "店舗", "販売"]);
+  const products: Product[] = await convertProducts(tables["商品"].data);
+  const stores: Store[] = await convertProducts(tables["店舗"].data);
+  const salesData: Sales[] = await convertShipments(tables["販売"].data);
+  const {
+    header,
+    todaySyunSalesData,
+  }: {
+    header: string;
+    todaySyunSalesData: SyunSales[];
+  } = await getTodaySyunSalesData();
+  const todaySalesData: Sales[] = await convertSyunToSales(
+    salesData,
+    todaySyunSalesData,
+    products,
+    stores
+  );
 
-  if (!spreadsheetId) {
-    console.error("Spreadsheet ID is undefined");
-    return [];
-  }
+  let filteredSalesData: Sales[] = [...salesData, ...todaySalesData];
 
-  try {
-    const response = await sheets.spreadsheets.values.batchGet({
-      spreadsheetId: spreadsheetId,
-      ranges: ["商品", "店舗", "販売"],
-    });
-
-    const data: sheets_v4.Schema$ValueRange[] | undefined =
-      response.data.valueRanges;
-    if (!data) {
-      return [];
-    }
-
-    const products: Product[] = await convertProducts(data[0].values);
-    const stores: Store[] = await convertStores(data[1].values);
-    const salesData: SalesItem[] = data[2].values
-      ? data[2].values
-          ?.slice(1)
-          .filter((row) => {
-            const storeCondition: boolean =
-              storeId === "all" ? true : row[5] === storeId;
-            const startCondition: boolean =
-              new Date(from).getTime() <= new Date(row[1]).getTime();
-            const endCondition: boolean =
-              new Date(row[1]).getTime() <= new Date(to).getTime();
-            return storeCondition && startCondition && endCondition;
-          })
-          .map((row) => {
-            const product: Product = products.find((p) => p.id === row[2])!;
-            return {
-              id: row[0],
-              date: row[1],
-              productId: row[2],
-              unitPrice: Number(row[3]),
-              quantity: Number(row[4]),
-              storeId: row[5],
-              productName: product.name,
-            };
-          })
-      : [];
-
-    const latestId: number = Math.max(
-      ...salesData.map((item) => Number(item.id))
+  if (storeId) {
+    filteredSalesData = filteredSalesData.filter((item) =>
+      storeId === "all" ? true : item.storeId === storeId
     );
-    const { todaySyunSalesData }: { todaySyunSalesData: SyunSales[] } =
-      await getTodaySyunSalesData();
-    const todaySalesData: SalesItem[] = todaySyunSalesData
-      .map((item, index) => {
-        const productId: string =
-          products.find((p) => p.name === item.productName)?.id || "";
-        const storeId: string =
-          stores.find((s) => s.name === item.storeName)?.id || "";
-        return {
-          id: (latestId + index + 1).toString(),
-          date: item.date,
-          productId: productId,
-          unitPrice: item.unitPrice,
-          quantity: item.quantity,
-          storeId: storeId,
-          productName: item.productName,
-        };
-      })
-      .filter((item) => {
-        const storeCondition: boolean =
-          storeId === "all" ? true : item.storeId === storeId;
-        const startCondition: boolean =
-          new Date(from).getTime() <= new Date(item.date).getTime();
-        const endCondition: boolean =
-          new Date(item.date).getTime() <= new Date(to).getTime();
-        return storeCondition && startCondition && endCondition;
-      });
-    if (
-      salesData.map((item) => item.date).includes(todaySalesData.at(0)?.date!)
-    ) {
-      return salesData;
-    }
-    return [...salesData, ...todaySalesData];
-  } catch (error: unknown) {
-    console.error((error as Error).message);
-    return [];
   }
+
+  if (from) {
+    filteredSalesData = filteredSalesData.filter(
+      (item) => new Date(from).getTime() <= new Date(item.date).getTime()
+    );
+  }
+
+  if (to) {
+    filteredSalesData = filteredSalesData.filter(
+      (item) => new Date(item.date).getTime() <= new Date(to).getTime()
+    );
+  }
+
+  const resultSalesData: Sales[] = filteredSalesData.map((item) => {
+    const productName: string =
+      products.find((p) => p.id === item.productId)?.name || "";
+    const storeName: string =
+      stores.find((s) => s.id === item.storeId)?.name || "";
+    return {
+      ...item,
+      productName,
+      storeName,
+    };
+  });
+  return resultSalesData;
 };
 
+// export const getSalesData = async (
+//   storeId: string,
+//   from: string,
+//   to: string
+// ): Promise<SalesItem[]> => {
+//   const sheets: sheets_v4.Sheets = await getSheets();
+//   const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+
+//   if (!spreadsheetId) {
+//     console.error("Spreadsheet ID is undefined");
+//     return [];
+//   }
+
+//   try {
+//     const response = await sheets.spreadsheets.values.batchGet({
+//       spreadsheetId: spreadsheetId,
+//       ranges: ["商品", "店舗", "販売"],
+//     });
+
+//     const data: sheets_v4.Schema$ValueRange[] | undefined =
+//       response.data.valueRanges;
+//     if (!data) {
+//       return [];
+//     }
+
+//     const products: Product[] = await convertProducts(data[0].values);
+//     const stores: Store[] = await convertStores(data[1].values);
+//     const salesData: SalesItem[] = data[2].values
+//       ? data[2].values
+//           ?.slice(1)
+//           .filter((row) => {
+//             const storeCondition: boolean =
+//               storeId === "all" ? true : row[5] === storeId;
+//             const startCondition: boolean =
+//               new Date(from).getTime() <= new Date(row[1]).getTime();
+//             const endCondition: boolean =
+//               new Date(row[1]).getTime() <= new Date(to).getTime();
+//             return storeCondition && startCondition && endCondition;
+//           })
+//           .map((row) => {
+//             const product: Product = products.find((p) => p.id === row[2])!;
+//             return {
+//               id: row[0],
+//               date: row[1],
+//               productId: row[2],
+//               unitPrice: Number(row[3]),
+//               quantity: Number(row[4]),
+//               storeId: row[5],
+//               productName: product.name,
+//             };
+//           })
+//       : [];
+
+//     const latestId: number = Math.max(
+//       ...salesData.map((item) => Number(item.id))
+//     );
+//     const { todaySyunSalesData }: { todaySyunSalesData: SyunSales[] } =
+//       await getTodaySyunSalesData();
+//     const todaySalesData: SalesItem[] = todaySyunSalesData
+//       .map((item, index) => {
+//         const productId: string =
+//           products.find((p) => p.name === item.productName)?.id || "";
+//         const storeId: string =
+//           stores.find((s) => s.name === item.storeName)?.id || "";
+//         return {
+//           id: (latestId + index + 1).toString(),
+//           date: item.date,
+//           productId: productId,
+//           unitPrice: item.unitPrice,
+//           quantity: item.quantity,
+//           storeId: storeId,
+//           productName: item.productName,
+//         };
+//       })
+//       .filter((item) => {
+//         const storeCondition: boolean =
+//           storeId === "all" ? true : item.storeId === storeId;
+//         const startCondition: boolean =
+//           new Date(from).getTime() <= new Date(item.date).getTime();
+//         const endCondition: boolean =
+//           new Date(item.date).getTime() <= new Date(to).getTime();
+//         return storeCondition && startCondition && endCondition;
+//       });
+//     if (
+//       salesData.map((item) => item.date).includes(todaySalesData.at(0)?.date!)
+//     ) {
+//       return salesData;
+//     }
+//     return [...salesData, ...todaySalesData];
+//   } catch (error: unknown) {
+//     console.error((error as Error).message);
+//     return [];
+//   }
+// };
+
 export const getTotalSalesData = async (
-  salesData: SalesItem[]
+  salesData: Sales[]
 ): Promise<TotalSales[]> => {
-  const productIds = [...new Set(salesData.map((item) => item.productId))];
+  const productIds: string[] = [
+    ...new Set(salesData.map((item) => item.productId)),
+  ];
 
   const totalData: TotalSales[] = productIds
     .map((productId) => {
       const productFilteredData = salesData.filter(
         (item) => item.productId === productId
       );
-      const productName: string = productFilteredData[0].productName;
+      const productName: string = productFilteredData[0].productName || "";
       const totalQuantity: number = productFilteredData.reduce(
         (prev, cur) => prev + cur.quantity,
         0
@@ -226,7 +289,7 @@ export const getTodaySyunSalesData = async (): Promise<{
 };
 
 export const getSalesTotalPrice = async (
-  salesData: SalesItem[]
+  salesData: Sales[]
 ): Promise<number> => {
   return salesData.reduce(
     (prev, cur) => prev + cur.unitPrice * cur.quantity,

@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { WasteItem } from "@/lib/types";
+import { Waste } from "@/lib/types";
 import { EditIcon, Loader2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,7 +38,7 @@ import { WasteSchema } from "@/schemas";
 import { updateWaste } from "@/actions/waste";
 
 type Props = {
-  wasteItem: WasteItem;
+  wasteItem: Waste;
 };
 
 export const WasteEditDialog = ({ wasteItem }: Props) => {
