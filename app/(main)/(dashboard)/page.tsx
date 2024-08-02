@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getSales } from "@/actions/sales";
 import { getToday } from "@/lib/date";
 import { Sales } from "@/lib/types";
+import DashboardLoading from "./loading";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,7 @@ export default async function Dashboard() {
     }))
     .toSorted((a, b) => Number(a.storeId) - Number(b.storeId));
 
+  // return <DashboardLoading />;
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
