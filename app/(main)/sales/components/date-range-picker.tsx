@@ -19,6 +19,7 @@ import { PopoverClose } from "@radix-ui/react-popover";
 export function DateRangePicker({
   className,
 }: React.HTMLAttributes<HTMLDivElement>) {
+  const [open, setOpen] = React.useState<boolean>(false);
   const today: Date = new Date();
   const router = useRouter();
   const pathname = usePathname();
@@ -34,7 +35,7 @@ export function DateRangePicker({
 
   return (
     <div className={cn("grid gap-2", className)}>
-      <Popover>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             id="date"
@@ -102,31 +103,56 @@ export function DateRangePicker({
               >
                 今年
               </Button>
+              <Button
+                variant={"outline"}
+                onClick={() =>
+                  setDate({
+                    from: new Date(
+                      today.getFullYear(),
+                      today.getMonth() - 1,
+                      1
+                    ),
+                    to: new Date(today.getFullYear(), today.getMonth(), 0),
+                  })
+                }
+              >
+                前月
+              </Button>
+              <Button
+                variant={"outline"}
+                onClick={() =>
+                  setDate({
+                    from: new Date(today.getFullYear() - 1, 0, 1),
+                    to: new Date(today.getFullYear() - 1, 11, 31),
+                  })
+                }
+              >
+                前年
+              </Button>
             </div>
           </div>
           <div className="flex justify-end">
-            <PopoverClose>
-              <Button
-                className="text-[16px] font-semibold"
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams.toString());
+            <Button
+              className="text-[16px] font-semibold"
+              onClick={() => {
+                const params = new URLSearchParams(searchParams.toString());
 
-                  const from: string = format(
-                    new Date(date?.from!),
-                    "yyyy-MM-dd"
-                  );
-                  const to: string = format(new Date(date?.to!), "yyyy-MM-dd");
-                  params.set("from", from);
-                  params.set("to", to);
-                  params.delete("page");
-                  router.push(`${pathname}?${params.toString()}`, {
-                    scroll: false,
-                  });
-                }}
-              >
-                適用する
-              </Button>
-            </PopoverClose>
+                const from: string = format(
+                  new Date(date?.from!),
+                  "yyyy-MM-dd"
+                );
+                const to: string = format(new Date(date?.to!), "yyyy-MM-dd");
+                params.set("from", from);
+                params.set("to", to);
+                params.delete("page");
+                router.push(`${pathname}?${params.toString()}`, {
+                  scroll: false,
+                });
+                setOpen(false);
+              }}
+            >
+              適用する
+            </Button>
           </div>
         </PopoverContent>
       </Popover>

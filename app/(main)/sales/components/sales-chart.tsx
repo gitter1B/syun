@@ -1,9 +1,15 @@
 "use client";
 
+import { JapaneseYenIcon, TrendingUp } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { JapaneseYenIcon } from "lucide-react";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { Sales } from "@/lib/types";
 
 const chartConfig = {
   price: {
@@ -14,15 +20,16 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type Props = {
-  chartData: { day: string; price: number }[];
+  chartData: { date: string; price: number }[];
 };
-export function MonthSalesChart({ chartData }: Props) {
+
+export function SalesChart({ chartData }: Props) {
   return (
-    <ChartContainer config={chartConfig} className="w-full">
+    <ChartContainer config={chartConfig}>
       <BarChart accessibilityLayer data={chartData}>
         <CartesianGrid vertical={false} />
         <XAxis
-          dataKey="day"
+          dataKey="date"
           tickLine={false}
           tickMargin={10}
           axisLine={false}
@@ -35,7 +42,11 @@ export function MonthSalesChart({ chartData }: Props) {
               : `${value.toLocaleString()}円`;
           }}
         />
-        <Bar dataKey="price" fill="var(--color-price)" radius={4} />
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent hideLabel />}
+        />
+        <Bar dataKey="price" fill="var(--color-price)" radius={8} />
       </BarChart>
     </ChartContainer>
   );

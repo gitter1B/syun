@@ -1,14 +1,15 @@
 export default function SalesLayout({
   children,
-  modal,
+  // modal,
+  dialog,
 }: {
   children: React.ReactNode;
-  modal: React.ReactNode;
+  dialog: React.ReactNode;
 }) {
   return (
     <div>
       {children}
-      {modal}
+      {dialog}
     </div>
   );
 }

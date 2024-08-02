@@ -100,5 +100,17 @@ export const convertSyunToSales = async (
       storeId: storeId,
     };
   });
-  return [];
+};
+
+export const convertSalesToChartData = async (
+  salesData: Sales[]
+): Promise<{ date: string; price: number }[]> => {
+  const dates: string[] = [...new Set(salesData.map((item) => item.date))];
+
+  return dates.map((date) => {
+    const totalPrice: number = salesData
+      .filter((item) => item.date === date)
+      .reduce((prev, cur) => prev + cur.unitPrice * cur.quantity, 0);
+    return { date: date, price: totalPrice };
+  });
 };
