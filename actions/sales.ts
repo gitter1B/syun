@@ -57,7 +57,8 @@ export const getAllSales = async (
 export const getSales = async (
   from?: string,
   to?: string,
-  storeId?: string
+  storeId?: string,
+  productId?: string
 ): Promise<Sales[]> => {
   const tables: Tables = await getTables(["商品", "店舗", "販売"]);
   const products: Product[] = await convertProducts(tables["商品"].data);
@@ -96,6 +97,11 @@ export const getSales = async (
       (item) => new Date(item.date).getTime() <= new Date(to).getTime()
     );
   }
+  if (productId) {
+    filteredSalesData = filteredSalesData.filter((item) =>
+      productId === "all" ? true : item.productId === productId
+    );
+  }
 
   const resultSalesData: Sales[] = filteredSalesData.map((item) => {
     const productName: string =
@@ -110,101 +116,6 @@ export const getSales = async (
   });
   return resultSalesData;
 };
-
-// export const getSalesData = async (
-//   storeId: string,
-//   from: string,
-//   to: string
-// ): Promise<SalesItem[]> => {
-//   const sheets: sheets_v4.Sheets = await getSheets();
-//   const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
-
-//   if (!spreadsheetId) {
-//     console.error("Spreadsheet ID is undefined");
-//     return [];
-//   }
-
-//   try {
-//     const response = await sheets.spreadsheets.values.batchGet({
-//       spreadsheetId: spreadsheetId,
-//       ranges: ["商品", "店舗", "販売"],
-//     });
-
-//     const data: sheets_v4.Schema$ValueRange[] | undefined =
-//       response.data.valueRanges;
-//     if (!data) {
-//       return [];
-//     }
-
-//     const products: Product[] = await convertProducts(data[0].values);
-//     const stores: Store[] = await convertStores(data[1].values);
-//     const salesData: SalesItem[] = data[2].values
-//       ? data[2].values
-//           ?.slice(1)
-//           .filter((row) => {
-//             const storeCondition: boolean =
-//               storeId === "all" ? true : row[5] === storeId;
-//             const startCondition: boolean =
-//               new Date(from).getTime() <= new Date(row[1]).getTime();
-//             const endCondition: boolean =
-//               new Date(row[1]).getTime() <= new Date(to).getTime();
-//             return storeCondition && startCondition && endCondition;
-//           })
-//           .map((row) => {
-//             const product: Product = products.find((p) => p.id === row[2])!;
-//             return {
-//               id: row[0],
-//               date: row[1],
-//               productId: row[2],
-//               unitPrice: Number(row[3]),
-//               quantity: Number(row[4]),
-//               storeId: row[5],
-//               productName: product.name,
-//             };
-//           })
-//       : [];
-
-//     const latestId: number = Math.max(
-//       ...salesData.map((item) => Number(item.id))
-//     );
-//     const { todaySyunSalesData }: { todaySyunSalesData: SyunSales[] } =
-//       await getTodaySyunSalesData();
-//     const todaySalesData: SalesItem[] = todaySyunSalesData
-//       .map((item, index) => {
-//         const productId: string =
-//           products.find((p) => p.name === item.productName)?.id || "";
-//         const storeId: string =
-//           stores.find((s) => s.name === item.storeName)?.id || "";
-//         return {
-//           id: (latestId + index + 1).toString(),
-//           date: item.date,
-//           productId: productId,
-//           unitPrice: item.unitPrice,
-//           quantity: item.quantity,
-//           storeId: storeId,
-//           productName: item.productName,
-//         };
-//       })
-//       .filter((item) => {
-//         const storeCondition: boolean =
-//           storeId === "all" ? true : item.storeId === storeId;
-//         const startCondition: boolean =
-//           new Date(from).getTime() <= new Date(item.date).getTime();
-//         const endCondition: boolean =
-//           new Date(item.date).getTime() <= new Date(to).getTime();
-//         return storeCondition && startCondition && endCondition;
-//       });
-//     if (
-//       salesData.map((item) => item.date).includes(todaySalesData.at(0)?.date!)
-//     ) {
-//       return salesData;
-//     }
-//     return [...salesData, ...todaySalesData];
-//   } catch (error: unknown) {
-//     console.error((error as Error).message);
-//     return [];
-//   }
-// };
 
 export const getTotalSalesData = async (
   salesData: Sales[]

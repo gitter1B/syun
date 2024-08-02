@@ -1,3 +1,4 @@
+"use client";
 import { JapaneseYenIcon } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
@@ -16,7 +17,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type Props = {
-  chartData: { day: string; price: number }[];
+  chartData: { date: string; price: number }[];
 };
 
 export const SalesChart = ({ chartData }: Props) => {
@@ -25,11 +26,14 @@ export const SalesChart = ({ chartData }: Props) => {
       <BarChart accessibilityLayer data={chartData}>
         <CartesianGrid vertical={false} />
         <XAxis
-          dataKey="day"
+          dataKey="date"
           tickLine={false}
           tickMargin={10}
           axisLine={false}
-          tickFormatter={(value) => value.slice(0, 3)}
+          tickFormatter={(value: string) => {
+            const [year, month, day] = value.split("-");
+            return `${parseInt(month)}/${parseInt(day)}`;
+          }}
         />
         <YAxis
           tickFormatter={(value) => {

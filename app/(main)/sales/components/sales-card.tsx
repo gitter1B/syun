@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -9,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronRightIcon, LineChartIcon } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   productId?: string;
@@ -23,17 +25,32 @@ export const SalesCard = ({
   price,
   quantity,
 }: Props) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   return (
     <Card className="flex flex-col gap-2 px-4 p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-[20px] w-full font-semibold flex items-center justify-between truncate">
           {productName}
         </h2>
-        <Button asChild variant={"outline"}>
-          <Link href={`/sales/detail/${productId}`} className="flex gap-2">
-            <LineChartIcon size={20} />
-            詳細
-          </Link>
+        <Button
+          variant={"outline"}
+          onClick={() => {
+            const params = new URLSearchParams(searchParams.toString());
+
+            if (productId) {
+              params.set("productId", productId);
+            }
+
+            console.log(`sales/details?${params.toString()}`);
+            router.push(`sales/details?${params.toString()}`, {
+              scroll: false,
+            });
+          }}
+        >
+          <LineChartIcon className="mr-2" size={20} />
+          詳細
         </Button>
       </div>
       <div className="grid grid-cols-2 text-[16px] gap-4">

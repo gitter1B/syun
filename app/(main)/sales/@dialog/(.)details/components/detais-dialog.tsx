@@ -11,10 +11,9 @@ import {
 import { useRouter } from "next/navigation";
 
 type Props = {
-  productName: string;
   children: React.ReactNode;
 };
-export const DetailModal = ({ productName, children }: Props) => {
+export const DetailsDialog = ({ children }: Props) => {
   const router = useRouter();
   return (
     <Dialog
@@ -25,7 +24,7 @@ export const DetailModal = ({ productName, children }: Props) => {
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{productName}</DialogTitle>
+          <DialogTitle></DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
         {children}
