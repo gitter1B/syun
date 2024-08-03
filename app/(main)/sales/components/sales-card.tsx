@@ -43,7 +43,6 @@ export const SalesCard = ({
               params.set("productId", productId);
             }
 
-            console.log(`sales/details?${params.toString()}`);
             router.push(`sales/details?${params.toString()}`, {
               scroll: false,
             });
