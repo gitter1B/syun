@@ -102,7 +102,7 @@ export const convertSyunToSales = async (
   });
 };
 
-export const convertSalesToChartData = async (
+export const convertSalesToBarChartData = async (
   salesData: Sales[]
 ): Promise<{ date: string; price: number }[]> => {
   const dates: string[] = [...new Set(salesData.map((item) => item.date))];
@@ -113,4 +113,59 @@ export const convertSalesToChartData = async (
       .reduce((prev, cur) => prev + cur.unitPrice * cur.quantity, 0);
     return { date: date, price: totalPrice };
   });
+};
+
+export const convertSalesToPieChartData = async (
+  salesData: Sales[]
+): Promise<{ productName: string; price: number; fill: string }[]> => {
+  const productIds: string[] = [
+    ...new Set(salesData.map((item) => item.productId)),
+  ];
+
+  const totalPriceData: { productName: string; totalPrice: number }[] =
+    productIds.map((productId) => {
+      const filteredSalesData: Sales[] = salesData.filter(
+        (item) => item.productId === productId
+      );
+      const totalPrice: number = filteredSalesData.reduce(
+        (prev, cur) => prev + cur.unitPrice * cur.quantity,
+        0
+      );
+      return {
+        productName: filteredSalesData[0]?.productName || "",
+        totalPrice: totalPrice,
+      };
+    });
+
+  const topFourData = totalPriceData
+    .sort((a, b) => b.totalPrice - a.totalPrice)
+    .slice(0, 4);
+
+  const otherDataTotal = totalPriceData
+    .slice(4)
+    .reduce((sum, item) => sum + item.totalPrice, 0);
+
+  const topFourWithColors: {
+    productName: string;
+    price: number;
+    fill: string;
+  }[] = topFourData.map((item, index) => ({
+    productName: item.productName,
+    price: item.totalPrice,
+    fill: `hsl(var(--chart-${index + 1}))`,
+  }));
+
+  const pieChartData =
+    otherDataTotal > 0
+      ? [
+          ...topFourWithColors,
+          {
+            productName: "その他",
+            price: otherDataTotal,
+            fill: "hsl(var(--chart-5))",
+          },
+        ]
+      : topFourWithColors;
+
+  return pieChartData;
 };
