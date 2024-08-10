@@ -26,8 +26,8 @@ export const SalesCard = ({
   quantity,
 }: Props) => {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
+
   return (
     <Card className="flex flex-col gap-2 px-4 p-4">
       <div className="flex items-center justify-between">

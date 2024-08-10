@@ -13,6 +13,7 @@ import { convertDateTextToDateString } from "@/lib/date";
 import { getTables } from "@/lib/sheet";
 import {
   convertProducts,
+  convertSales,
   convertShipments,
   convertSyunToSales,
 } from "@/lib/convert-data";
@@ -42,7 +43,8 @@ export const getAllSales = async (
             productId: row[2],
             unitPrice: Number(row[3]),
             quantity: Number(row[4]),
-            storeId: row[5],
+            totalPrice: Number(row[5]),
+            storeId: row[6],
           };
         })
       : [];
@@ -63,7 +65,7 @@ export const getSales = async (
   const tables: Tables = await getTables(["商品", "店舗", "販売"]);
   const products: Product[] = await convertProducts(tables["商品"].data);
   const stores: Store[] = await convertProducts(tables["店舗"].data);
-  const salesData: Sales[] = await convertShipments(tables["販売"].data);
+  const salesData: Sales[] = await convertSales(tables["販売"].data);
   const {
     header,
     todaySyunSalesData,
@@ -71,6 +73,7 @@ export const getSales = async (
     header: string;
     todaySyunSalesData: SyunSales[];
   } = await getTodaySyunSalesData();
+
   const todaySalesData: Sales[] = await convertSyunToSales(
     salesData,
     todaySyunSalesData,
@@ -135,7 +138,7 @@ export const getTotalSalesData = async (
         0
       );
       const totalPrice: number = productFilteredData.reduce(
-        (prev, cur) => prev + cur.unitPrice * cur.quantity,
+        (prev, cur) => prev + cur.totalPrice,
         0
       );
       return {
@@ -180,11 +183,22 @@ export const getTodaySyunSalesData = async (): Promise<{
         .find("td:nth-child(1)")
         .text()
         .trim();
-      const unitPrice: number = parseInt(
-        $(element).find("td:nth-child(2)").text()
+      const unitPrice: number = Number(
+        $(element)
+          .find("td:nth-child(2)")
+          .text()
+          .replace(",", "")
+          .replace("円", "")
       );
-      const quantity: number = parseInt(
+      const quantity: number = Number(
         $(element).find("td:nth-child(3)").text()
+      );
+      const totalPrice: number = Number(
+        $(element)
+          .find("td:nth-child(4)")
+          .text()
+          .replace(",", "")
+          .replace("円", "")
       );
 
       todaySyunSalesData.push({
@@ -193,6 +207,7 @@ export const getTodaySyunSalesData = async (): Promise<{
         productName: productName,
         unitPrice: unitPrice,
         quantity: quantity,
+        totalPrice: totalPrice,
       });
     }
   });
@@ -202,8 +217,5 @@ export const getTodaySyunSalesData = async (): Promise<{
 export const getSalesTotalPrice = async (
   salesData: Sales[]
 ): Promise<number> => {
-  return salesData.reduce(
-    (prev, cur) => prev + cur.unitPrice * cur.quantity,
-    0
-  );
+  return salesData.reduce((prev, cur) => prev + cur.totalPrice, 0);
 };

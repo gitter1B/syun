@@ -34,7 +34,7 @@ export async function getYearChartData(
       return year === date.getFullYear() && month === date.getMonth() + 1;
     });
     const price: number = monthData.reduce(
-      (prev, cur) => prev + cur.unitPrice * cur.quantity,
+      (prev, cur) => prev + cur.totalPrice,
       0
     );
     return {
@@ -60,7 +60,7 @@ export async function getMonthChartData(
       );
     });
     const price: number = dayData.reduce(
-      (prev, cur) => prev + cur.unitPrice * cur.quantity,
+      (prev, cur) => prev + cur.totalPrice,
       0
     );
     return {

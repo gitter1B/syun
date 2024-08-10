@@ -54,7 +54,8 @@ export const convertSales = async (
           productId: row[2],
           unitPrice: Number(row[3]),
           quantity: Number(row[4]),
-          storeId: row[5],
+          totalPrice: Number(row[5]),
+          storeId: row[6],
         };
       })
     : [];
@@ -97,6 +98,7 @@ export const convertSyunToSales = async (
       productId: productId,
       unitPrice: item.unitPrice,
       quantity: item.quantity,
+      totalPrice: item.totalPrice,
       storeId: storeId,
     };
   });
@@ -110,7 +112,7 @@ export const convertSalesToBarChartData = async (
   return dates.map((date) => {
     const totalPrice: number = salesData
       .filter((item) => item.date === date)
-      .reduce((prev, cur) => prev + cur.unitPrice * cur.quantity, 0);
+      .reduce((prev, cur) => prev + cur.totalPrice, 0);
     return { date: date, price: totalPrice };
   });
 };
@@ -128,7 +130,7 @@ export const convertSalesToPieChartData = async (
         (item) => item.productId === productId
       );
       const totalPrice: number = filteredSalesData.reduce(
-        (prev, cur) => prev + cur.unitPrice * cur.quantity,
+        (prev, cur) => prev + cur.totalPrice,
         0
       );
       return {
