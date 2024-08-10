@@ -31,6 +31,7 @@ export type Sales = {
   productId: string;
   unitPrice: number;
   quantity: number;
+  totalPrice: number;
   storeId: string;
   productName?: string;
   storeName?: string;
@@ -53,6 +54,7 @@ export type SyunSales = {
   productName: string;
   unitPrice: number;
   quantity: number;
+  totalPrice: number;
 };
 
 // export type SalesSearchParams = {

@@ -6,16 +6,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 type Props = {
   productName: string;
   price: number;
   quantity: number;
+  totalPrice: number;
 };
 
-export const TodaySalesCard = ({ productName, price, quantity }: Props) => {
+export const TodaySalesCard = ({
+  productName,
+  price,
+  quantity,
+  totalPrice,
+}: Props) => {
   return (
-    <Card className="grid grid-cols-[1fr_80px_50px] items-center gap-2 px-4 p-4">
+    <Card
+      className={cn(
+        "grid grid-cols-[1fr_80px_50px] items-center gap-2 px-4 p-4",
+        price * quantity !== totalPrice && "bg-blue text-primary-foreground"
+      )}
+    >
       <h2 className="text-[20px] w-full font-semibold flex items-center truncate">
         {productName}
       </h2>

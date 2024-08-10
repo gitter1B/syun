@@ -25,7 +25,7 @@ export const SalesList = async ({ searchParams }: Props) => {
   const startPage: number = ITEMS_PER_PAGE * (page - 1);
   const endPage: number = startPage + ITEMS_PER_PAGE;
   const totalPrice: number = salesData.reduce(
-    (prev, cur) => prev + cur.unitPrice * cur.quantity,
+    (prev, cur) => prev + cur.totalPrice,
     0
   );
   if (salesData.length === 0) {
@@ -46,6 +46,7 @@ export const SalesList = async ({ searchParams }: Props) => {
                     productName={item.productName!}
                     quantity={item.quantity}
                     price={item.unitPrice}
+                    totalPrice={item.totalPrice}
                   />
                 );
               })}

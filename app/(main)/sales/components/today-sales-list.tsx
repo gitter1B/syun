@@ -13,7 +13,7 @@ export const TodaySalesList = async () => {
     ...new Set(todaySyunSalesData.map((item) => item.storeName)),
   ];
   const totalPrice: number = todaySyunSalesData.reduce(
-    (prev, cur) => prev + cur.unitPrice * cur.quantity,
+    (prev, cur) => prev + cur.totalPrice,
     0
   );
   return (
@@ -34,6 +34,7 @@ export const TodaySalesList = async () => {
                       productName={item.productName}
                       quantity={item.quantity}
                       price={item.unitPrice}
+                      totalPrice={item.totalPrice}
                     />
                   );
                 })}
