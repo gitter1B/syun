@@ -14,7 +14,6 @@ import { getTables } from "@/lib/sheet";
 import {
   convertProducts,
   convertSales,
-  convertShipments,
   convertSyunToSales,
 } from "@/lib/convert-data";
 
@@ -66,6 +65,7 @@ export const getSales = async (
   const products: Product[] = await convertProducts(tables["商品"].data);
   const stores: Store[] = await convertProducts(tables["店舗"].data);
   const salesData: Sales[] = await convertSales(tables["販売"].data);
+
   const {
     header,
     todaySyunSalesData,
@@ -81,7 +81,10 @@ export const getSales = async (
     stores
   );
 
-  let filteredSalesData: Sales[] = [...salesData, ...todaySalesData];
+  let filteredSalesData: Sales[] = await unionSalesData(
+    salesData,
+    todaySalesData
+  );
 
   if (storeId) {
     filteredSalesData = filteredSalesData.filter((item) =>
@@ -218,4 +221,19 @@ export const getSalesTotalPrice = async (
   salesData: Sales[]
 ): Promise<number> => {
   return salesData.reduce((prev, cur) => prev + cur.totalPrice, 0);
+};
+
+const unionSalesData = async (
+  salesData: Sales[],
+  todaySalesData: Sales[]
+): Promise<Sales[]> => {
+  const todayDate: string = todaySalesData[0].date;
+
+  const resultSalesData: Sales[] = [
+    ...salesData.filter((item) => {
+      return item.date !== todayDate;
+    }),
+    ...todaySalesData,
+  ];
+  return resultSalesData;
 };
