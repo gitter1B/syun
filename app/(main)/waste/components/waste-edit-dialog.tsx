@@ -35,7 +35,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ChangeEvent } from "react";
 import { WasteSchema } from "@/schemas";
-import { updateWaste } from "@/actions/waste";
+import { updateWaste } from "@/lib/actions/waste";
 
 type Props = {
   wasteItem: Waste;

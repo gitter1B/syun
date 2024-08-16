@@ -1,5 +1,4 @@
 "use client";
-import { deleteWaste } from "@/actions/waste";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { deleteWaste } from "@/lib/actions/waste";
 import { Waste } from "@/lib/types";
 import { Loader2Icon, Trash2Icon } from "lucide-react";
 import { MouseEvent, useState, useTransition } from "react";

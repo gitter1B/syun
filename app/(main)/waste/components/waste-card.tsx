@@ -15,12 +15,12 @@ type Props = {
 };
 
 export const WasteCard = ({ wasteItem }: Props) => {
-  const { date, productName, storeName, unitPrice, quantity } = wasteItem;
+  const { date, product, store, unitPrice, quantity } = wasteItem;
   return (
     <Card>
       <CardContent className="p-4 flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-md font-semibold truncate">{storeName}</span>
+          <span className="text-md font-semibold truncate">{store?.name}</span>
           <span className="text-base font-medium truncate">
             {format(date, "yyyy年MM月dd日")}
           </span>
@@ -28,7 +28,7 @@ export const WasteCard = ({ wasteItem }: Props) => {
         </div>
         <div className="flex items-center justify-between gap-2 text-right text-[16px] font-semibold">
           <div className="text-[20px] font-semibold truncate">
-            {productName}
+            {product?.name}
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>{unitPrice.toLocaleString()}円</div>

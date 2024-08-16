@@ -1,4 +1,27 @@
-import { Product, Sales, Shipment, Store, SyunSales, Waste } from "./types";
+import {
+  Product,
+  Sales,
+  Shipment,
+  Store,
+  SyunSales,
+  TotalSales,
+  User,
+  Waste,
+} from "./types";
+
+export const convertUsers = async (
+  values: string[][] | null | undefined
+): Promise<User[]> => {
+  return values
+    ? values.map((row) => {
+        return {
+          id: row[0],
+          username: row[1],
+          password: row[2],
+        };
+      })
+    : [];
+};
 
 export const convertProducts = async (
   values: string[][] | null | undefined
@@ -78,6 +101,41 @@ export const convertWastes = async (
     : [];
 };
 
+export const convertSalesToTotalSales = async (
+  salesData: Sales[]
+): Promise<TotalSales[]> => {
+  const productIds: string[] = [
+    ...new Set(salesData.map((item) => item.productId)),
+  ];
+
+  const totalData: TotalSales[] = productIds
+    .map((productId) => {
+      const productFilteredData = salesData.filter(
+        (item) => item.productId === productId
+      );
+      const productName: string = productFilteredData[0].product?.name || "";
+      const totalQuantity: number = productFilteredData.reduce(
+        (prev, cur) => prev + cur.quantity,
+        0
+      );
+      const totalPrice: number = productFilteredData.reduce(
+        (prev, cur) => prev + cur.totalPrice,
+        0
+      );
+      return {
+        productId: productId,
+        productName: productName,
+        totalPrice: totalPrice,
+        totalQuantity: totalQuantity,
+      };
+    })
+    .filter((item) => item.totalPrice > 0);
+  const sortedData: TotalSales[] = [...totalData].sort(
+    (a, b) => b.totalPrice - a.totalPrice
+  );
+  return sortedData;
+};
+
 export const convertSyunToSales = async (
   salesData: Sales[],
   syunSalesData: SyunSales[],
@@ -134,7 +192,7 @@ export const convertSalesToPieChartData = async (
         0
       );
       return {
-        productName: filteredSalesData[0]?.productName || "",
+        productName: filteredSalesData[0]?.product?.name || "",
         totalPrice: totalPrice,
       };
     });

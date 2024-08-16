@@ -45,7 +45,7 @@ export function SearchProduct({ products }: Props) {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger className="min-w-48" asChild>
         <Button
           variant="outline"
           role="combobox"

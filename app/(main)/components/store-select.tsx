@@ -15,25 +15,24 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   stores: Store[];
-  resetPage?: boolean;
 };
-export function StoreSelect({ stores, resetPage }: Props) {
+export function StoreSelect({ stores }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const storeId: string | undefined = searchParams.get("storeId") || "all";
+  const storeId: string = searchParams.get("storeId") || "all";
   return (
     <Select
       defaultValue={storeId}
       onValueChange={(value) => {
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(searchParams.toString());
         params.set("storeId", value);
-        if (resetPage) params.set("page", "1");
-        router.push(`?${params.toString()}`, {
+        params.delete("page");
+        router.replace(`?${params.toString()}`, {
           scroll: false,
         });
       }}
     >
-      <SelectTrigger className="min-w-48">
+      <SelectTrigger className="w-48">
         <SelectValue placeholder="店舗を選択してください。" />
       </SelectTrigger>
       <SelectContent>

@@ -7,11 +7,14 @@ export default async function WastePage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const productId: string = (searchParams.productId || "all") as string;
+  const storeId: string = (searchParams.storeId || "all") as string;
+  const page: number = Number(searchParams.page) || 1;
   return (
     <div className="flex flex-col gap-4">
       <WasteFilter />
       <Suspense key={JSON.stringify(searchParams)} fallback={<p>loading...</p>}>
-        <WasteList searchParams={searchParams} />
+        <WasteList productId={productId} storeId={storeId} page={page} />
       </Suspense>
     </div>
   );

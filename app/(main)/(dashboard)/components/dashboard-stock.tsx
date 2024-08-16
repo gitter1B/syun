@@ -1,22 +1,15 @@
-import { Stock } from "@/lib/types";
-import { getStocks } from "@/actions/stock";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getDashboardStock } from "@/lib/data/dashboard";
+
 export const DashboardStock = async () => {
-  const stocks: Stock[] = await getStocks();
-  const existStoreItems: { storeId: string; storeName: string }[] = stocks
-    .filter(
-      (item, index, self) =>
-        index === self.findIndex((t) => t.storeId === item.storeId)
-    )
-    .map((item) => ({
-      storeId: item.storeId,
-      storeName: item.storeName!,
-    }))
-    .toSorted((a, b) => Number(a.storeId) - Number(b.storeId));
+  const { stocks, existStoreItems } = await getDashboardStock();
   return (
     <>
-      <h1 className="text-xl font-semibold mb-2 w-full border-b pb-1">残数</h1>
-      <Tabs defaultValue={existStoreItems.at(0)?.storeId} className="w-full">
+      <h1 className="text-xl font-semibold w-full border-b pb-1">残数</h1>
+      <Tabs
+        defaultValue={existStoreItems.at(0)?.storeId || ""}
+        className="w-full"
+      >
         <TabsList>
           {existStoreItems.map(({ storeId, storeName }) => {
             return (

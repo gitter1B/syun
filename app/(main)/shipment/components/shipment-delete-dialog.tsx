@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteShipment } from "@/actions/shipment";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,8 +11,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { deleteShipment } from "@/lib/actions/shipment";
 import { Shipment } from "@/lib/types";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, Trash2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -22,7 +22,9 @@ type Props = {
   onSuccess?: () => void;
 };
 export const ShipmentDeleteDialog = ({ shipment, onSuccess }: Props) => {
-  const { date, storeName, productName, unitPrice, quantity } = shipment;
+  const { date, store, product, unitPrice, quantity } = shipment;
+  const storeName: string = store?.name || "";
+  const productName: string = product?.name || "";
   const [year, month, day] = date.split("-");
   const formatDate = `${year}年${month}月${day}日`;
   const [isPending, startTransition] = useTransition();
@@ -34,7 +36,10 @@ export const ShipmentDeleteDialog = ({ shipment, onSuccess }: Props) => {
         className="flex items-center cursor-pointer p-2 w-full"
         asChild
       >
-        <Button variant={"outline"}>削除する</Button>
+        <Button variant={"outline"}>
+          <Trash2Icon className="mr-2" size={20} />
+          削除する
+        </Button>
       </DialogTrigger>
 
       <DialogContent>

@@ -29,12 +29,12 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { ShipmentSchema } from "@/schemas";
-import { Product, Store } from "@/lib/types";
+import { Product } from "@/lib/types";
 import { Check, ChevronsUpDown, Loader2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
-import { addShipment } from "@/actions/shipment";
 import { useSearchParams } from "next/navigation";
-import { format, formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone } from "date-fns-tz";
+import { createShipment } from "@/lib/actions/shipment";
 
 type Props = {
   products: Product[];
@@ -60,7 +60,7 @@ export function ShipmentForm({ products }: Props) {
       const date = (searchParams.get("date") ||
         formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) as string;
       const storeId = (searchParams.get("storeId") || "1") as string;
-      await addShipment(values, date, storeId);
+      await createShipment(values, date, storeId);
       form.reset({
         product: form.getValues("product"),
         unitPrice: "",
