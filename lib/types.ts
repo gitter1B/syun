@@ -21,8 +21,13 @@ export type Shipment = {
   unitPrice: number;
   quantity: number;
   storeId: string;
-  productName?: string;
-  storeName?: string;
+  product?: Product;
+  store?: Store;
+};
+
+export type ShipmentFilters = {
+  storeId: string;
+  date: string;
 };
 
 export type Sales = {
@@ -33,13 +38,16 @@ export type Sales = {
   quantity: number;
   totalPrice: number;
   storeId: string;
-  productName?: string;
-  storeName?: string;
+  product?: Product;
+  store?: Store;
 };
 
-// export type SalesItem = Sales & {
-//   productName: string;
-// };
+export type SalesFilters = {
+  storeId?: string;
+  productId?: string;
+  from?: string;
+  to?: string;
+};
 
 export type TotalSales = {
   productId: string;
@@ -57,18 +65,6 @@ export type SyunSales = {
   totalPrice: number;
 };
 
-// export type SalesSearchParams = {
-//   storeId: string;
-//   year: string;
-//   month: string;
-//   page: string;
-// };
-
-// export type ShipmentItem = Shipment & {
-//   storeName: string;
-//   productName: string;
-// };
-
 export type Waste = {
   id: string;
   date: string;
@@ -76,14 +72,14 @@ export type Waste = {
   productId: string;
   unitPrice: number;
   quantity: number;
-  storeName?: string;
-  productName?: string;
+  store?: Store;
+  product?: Product;
 };
 
-// export type WasteItem = Waste & {
-//   storeName: string;
-//   productName: string;
-// };
+export type WasteFilters = {
+  storeId?: string;
+  productId?: string;
+};
 
 export type Stock = {
   id: string;

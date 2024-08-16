@@ -5,14 +5,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   Form,
   FormControl,
   FormDescription,
@@ -22,23 +14,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { ShipmentSchema } from "@/schemas";
-import { Product, Shipment, Store } from "@/lib/types";
-import { Check, ChevronsUpDown, Loader2Icon } from "lucide-react";
-import { useState, useTransition } from "react";
-import { updateShipment } from "@/actions/shipment";
+import { Shipment } from "@/lib/types";
+import { EditIcon, Loader2Icon } from "lucide-react";
+import { useTransition } from "react";
 import { toast } from "sonner";
+import { updateShipment } from "@/lib/actions/shipment";
 
 type Props = {
-  // shipmentItem: Shipment;
   shipment: Shipment;
-  // products: Product[];
   onSuccess?: () => void;
 };
 export function ShipmentEditForm({ shipment, onSuccess }: Props) {
@@ -54,7 +38,6 @@ export function ShipmentEditForm({ shipment, onSuccess }: Props) {
   });
 
   const [isPending, startTransition] = useTransition();
-  const [productOpen, setProductOpen] = useState<boolean>(false);
 
   function onSubmit(values: z.infer<typeof ShipmentSchema>) {
     startTransition(async () => {
@@ -74,76 +57,6 @@ export function ShipmentEditForm({ shipment, onSuccess }: Props) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-auto">
         <div className="space-y-4">
-          {/* <FormField
-            control={form.control}
-            name="product"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>商品</FormLabel>
-                <Popover
-                  modal={true}
-                  open={productOpen}
-                  onOpenChange={setProductOpen}
-                >
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          "w-full justify-between",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value
-                          ? products.find(
-                              (product) => product.id === field.value
-                            )?.name
-                          : "商品を選択"}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full max-w-96 p-0" align="start">
-                    <Command>
-                      <CommandInput
-                        className="text-[16px]"
-                        placeholder="商品を検索"
-                      />
-                      <CommandEmpty>商品が見つかりませんでした。</CommandEmpty>
-                      <CommandList>
-                        <CommandGroup>
-                          {products.map((product) => (
-                            <CommandItem
-                              value={product.id + product.name}
-                              key={product.id}
-                              onSelect={() => {
-                                form.setValue("product", product.id);
-                                setProductOpen(false);
-                              }}
-                              className="whitespace-nowrap"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  product.id === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              <span className="mr-2 w-12">{product.id}</span>
-                              {product.name}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
           <FormField
             control={form.control}
             name="unitPrice"
@@ -174,7 +87,8 @@ export function ShipmentEditForm({ shipment, onSuccess }: Props) {
         <div className="flex justify-end mt-6">
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending && <Loader2Icon className="animate-spin mr-2" />}
-            更新する
+            <EditIcon className="mr-2" size={20} />
+            編集する
           </Button>
         </div>
       </form>

@@ -18,7 +18,7 @@ type Props = {
   shipment: Shipment;
 };
 export const ShipmentEditSheet = ({ shipment }: Props) => {
-  const { productName } = shipment;
+  const productName = shipment.product?.name;
   const [open, setOpen] = useState<boolean>(false);
   return (
     <Sheet open={open} onOpenChange={setOpen}>

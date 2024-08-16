@@ -7,19 +7,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Shipment } from "@/lib/types";
-import { getShipments } from "@/actions/shipment";
-import { getToday } from "@/lib/date";
 import { ShipmentEditSheet } from "./shipment-edit-sheet";
+import { getShipments } from "@/lib/data/shipment";
 
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
+  storeId: string;
+  date: string;
 };
-export const ShipmentTable = async ({ searchParams }: Props) => {
-  const today: string = await getToday();
-  const storeId: string = (searchParams?.storeId || "1") as string;
-  const date: string = (searchParams?.date || today) as string;
-  const shipments: Shipment[] = await getShipments(storeId, date);
+export const ShipmentTable = async ({ storeId, date }: Props) => {
+  const { shipments } = await getShipments({
+    storeId,
+    date,
+  });
 
   if (shipments.length === 0) {
     return <p>データがありません</p>;
@@ -35,11 +34,11 @@ export const ShipmentTable = async ({ searchParams }: Props) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {[...shipments].map((item) => {
+        {shipments.map((item) => {
           return (
             <TableRow key={item.id} className="h-[76px]">
               <TableCell className="text-[16px] font-semibold">
-                {item.productName}
+                {item.product?.name}
               </TableCell>
               <TableCell className="text-right truncate">
                 {item.unitPrice.toLocaleString()}円

@@ -7,24 +7,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getStocks } from "@/actions/stock";
-import { Stock } from "@/lib/types";
 import { StockModal } from "./stock-modal";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { fetchStockTable } from "@/lib/data/stock";
 
 export const StockTable = async () => {
-  const stocks: Stock[] = await getStocks();
-  const existStoreItems: { storeId: string; storeName: string }[] = stocks
-    .filter(
-      (item, index, self) =>
-        index === self.findIndex((t) => t.storeId === item.storeId)
-    )
-    .map((item) => ({
-      storeId: item.storeId,
-      storeName: item.storeName!,
-    }))
-    .toSorted((a, b) => Number(a.storeId) - Number(b.storeId));
+  const { stocks, existStoreItems } = await fetchStockTable();
   return (
     <Tabs defaultValue={existStoreItems.at(0)?.storeId}>
       <TabsList>

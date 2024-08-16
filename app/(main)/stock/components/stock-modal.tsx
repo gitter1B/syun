@@ -1,5 +1,4 @@
 "use client";
-import { addWaste } from "@/actions/waste";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,6 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { createWaste } from "@/lib/actions/waste";
 
 type Props = {
   stock: Stock;
@@ -156,7 +156,7 @@ export const StockModal = ({ stock }: Props) => {
           <Button
             onClick={() => {
               startTransition(async () => {
-                await addWaste(
+                await createWaste(
                   date ? format(date, "yyyy-MM-dd") : "",
                   quantity,
                   stock

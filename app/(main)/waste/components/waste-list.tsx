@@ -1,19 +1,18 @@
-import { getWastes } from "@/actions/waste";
 import { Waste } from "@/lib/types";
 import { WasteCard } from "./waste-card";
 import { Pagination } from "../../components/pagination";
+import { fetchWasteList } from "@/lib/data/waste";
 
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
+  storeId: string;
+  productId: string;
+  page: number;
 };
-export const WasteList = async ({ searchParams }: Props) => {
-  const productId: string = (searchParams.productId || "all") as string;
-  const storeId: string = (searchParams.storeId || "all") as string;
-  const page: number = Number(searchParams.page) || 1;
+export const WasteList = async ({ storeId, productId, page }: Props) => {
   const ITEMS_PER_PAGE: number = 12;
   const startPage: number = ITEMS_PER_PAGE * (page - 1);
   const endPage: number = startPage + ITEMS_PER_PAGE;
-  const wastes: Waste[] = await getWastes(productId, storeId);
+  const { wastes } = await fetchWasteList();
 
   if (wastes.length === 0) {
     return <div>データがありません。</div>;
@@ -22,7 +21,7 @@ export const WasteList = async ({ searchParams }: Props) => {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-        {[...wastes].slice(startPage, endPage).map((item) => {
+        {wastes.slice(startPage, endPage).map((item) => {
           return <WasteCard key={item.id} wasteItem={item} />;
         })}
       </div>
