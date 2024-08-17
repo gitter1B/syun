@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Shipment, Store } from "@/lib/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { format, formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone } from "date-fns-tz";
 
 type Props = {
   stores: Store[];

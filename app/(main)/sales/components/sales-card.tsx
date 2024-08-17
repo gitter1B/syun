@@ -8,9 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ChevronRightIcon, LineChartIcon } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { LineChartIcon } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
   productId?: string;

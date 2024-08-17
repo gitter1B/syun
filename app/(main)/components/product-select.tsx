@@ -25,7 +25,7 @@ type Props = {
   products: Product[];
 };
 
-export function SearchProduct({ products }: Props) {
+export function ProductSelect({ products }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

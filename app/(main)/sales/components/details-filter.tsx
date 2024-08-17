@@ -5,7 +5,6 @@ import {
 } from "@/components/ui/popover";
 import { FilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StoreSelect } from "../../components/store-select";
 
 type Props = {
   children: React.ReactNode;

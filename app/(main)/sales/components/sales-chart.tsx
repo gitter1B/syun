@@ -1,6 +1,6 @@
 "use client";
 
-import { JapaneseYenIcon, TrendingUp } from "lucide-react";
+import { JapaneseYenIcon } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
@@ -9,7 +9,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Sales } from "@/lib/types";
 
 const chartConfig = {
   price: {
