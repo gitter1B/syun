@@ -8,7 +8,6 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { Nav } from "./nav";
 import { linkItems } from "@/lib/data";
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";

@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/popover";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Shipment } from "@/lib/types";
 
 type Props = {
   existDates: Date[];

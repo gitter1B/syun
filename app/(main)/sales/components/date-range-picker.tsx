@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 
@@ -14,7 +14,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { PopoverClose } from "@radix-ui/react-popover";
 
 export function DateRangePicker({
   className,
