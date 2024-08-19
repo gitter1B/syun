@@ -53,6 +53,13 @@ export const getSalesData = async (
         storeIdConditon =
           options.storeId === "all" ? true : item.storeId === options?.storeId;
       }
+      let productIdCondition: boolean = true;
+      if (options?.productId) {
+        productIdCondition =
+          options.productId === "all"
+            ? true
+            : item.productId === options.productId;
+      }
 
       let fromCondition: boolean = true;
       if (options?.from) {
@@ -66,7 +73,9 @@ export const getSalesData = async (
           new Date(item.date).getTime() <= new Date(options.to).getTime();
       }
 
-      return storeIdConditon && fromCondition && toCondition;
+      return (
+        storeIdConditon && productIdCondition && fromCondition && toCondition
+      );
     })
     .map((item) => {
       const product: Product | undefined = products.find(
