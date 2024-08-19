@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDashboardStock } from "@/lib/data/dashboard";
+import { cn } from "@/lib/utils";
 
 export const DashboardStock = async () => {
   const { stocks, existStoreItems } = await getDashboardStock();
@@ -27,7 +28,14 @@ export const DashboardStock = async () => {
                   .filter((stock) => stock.storeId === storeId)
                   .map(({ id, productName, unitPrice, quantity }) => {
                     return (
-                      <div key={id} className="p-4 border rounded-sm shadow-sm">
+                      <div
+                        key={id}
+                        className={cn(
+                          "p-4 border rounded-sm shadow-sm",
+                          quantity <= 0 &&
+                            "bg-destructive text-destructive-foreground"
+                        )}
+                      >
                         <div className="truncate font-semibold">
                           {productName}
                         </div>

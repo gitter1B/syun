@@ -101,6 +101,9 @@ export const getTodaySyunSalesData = async (): Promise<{
   const $ = cheerio.load(html, { decodeEntities: false });
   const header: string = $("h3").text();
   const date = convertDateTextToDateString(header);
+  if (!date) {
+    return { header: "", todaySyunSalesData: [] };
+  }
   let storeName: string = "";
   let todaySyunSalesData: SyunSales[] = [];
   $('table[id="ls"] > tbody > tr').each((index, element) => {
