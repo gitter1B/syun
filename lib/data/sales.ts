@@ -41,6 +41,7 @@ export const getSalesData = async (
     products,
     stores
   );
+
   let unionedSalesData: Sales[] = await unionSalesData(
     salesData,
     todaySalesData
@@ -191,6 +192,9 @@ const unionSalesData = async (
   salesData: Sales[],
   todaySalesData: Sales[]
 ): Promise<Sales[]> => {
+  if (todaySalesData.length === 0) {
+    return salesData;
+  }
   const todayDate: string = todaySalesData[0].date;
 
   const resultSalesData: Sales[] = [
