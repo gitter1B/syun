@@ -12,7 +12,10 @@ export const WasteList = async ({ storeId, productId, page }: Props) => {
   const ITEMS_PER_PAGE: number = 12;
   const startPage: number = ITEMS_PER_PAGE * (page - 1);
   const endPage: number = startPage + ITEMS_PER_PAGE;
-  const { wastes } = await fetchWasteList();
+  const { wastes } = await fetchWasteList({
+    productId,
+    storeId,
+  });
 
   if (wastes.length === 0) {
     return <div>データがありません。</div>;
