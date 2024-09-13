@@ -6,9 +6,11 @@ import {
   Tables,
   SyunSales,
   TotalSales,
+  Producer,
 } from "@/lib/types";
 import { getTables } from "@/lib/sheet";
 import {
+  convertProducers,
   convertProducts,
   convertSales,
   convertSalesToTotalSales,
@@ -20,20 +22,17 @@ import * as cheerio from "cheerio";
 import { convertDateTextToDateString } from "@/lib/date";
 
 export const getSalesData = async (
-  options?: SalesFilters
+  filters?: SalesFilters
 ): Promise<Sales[]> => {
-  const tables: Tables = await getTables(["商品", "店舗", "販売"]);
+  const tables: Tables = await getTables(["生産者", "商品", "店舗", "販売"]);
   const products: Product[] = await convertProducts(tables["商品"].data);
   const stores: Store[] = await convertProducts(tables["店舗"].data);
   const salesData: Sales[] = await convertSales(tables["販売"].data);
+  const producers: Producer[] = await convertProducers(tables["生産者"].data);
 
-  const {
-    header,
-    todaySyunSalesData,
-  }: {
-    header: string;
-    todaySyunSalesData: SyunSales[];
-  } = await getTodaySyunSalesData();
+  const todaySyunSalesData: SyunSales[] = await getTodaySyunSalesData(
+    producers
+  );
 
   const todaySalesData: Sales[] = await convertSyunToSales(
     salesData,
@@ -49,33 +48,41 @@ export const getSalesData = async (
 
   const resultSalesData: Sales[] = unionedSalesData
     .filter((item) => {
+      let producerCondition: boolean = true;
+      if (filters?.producerId) {
+        producerCondition = item.producerId === filters.producerId;
+      }
       let storeIdConditon: boolean = true;
-      if (options?.storeId) {
+      if (filters?.storeId) {
         storeIdConditon =
-          options.storeId === "all" ? true : item.storeId === options?.storeId;
+          filters.storeId === "all" ? true : item.storeId === filters?.storeId;
       }
       let productIdCondition: boolean = true;
-      if (options?.productId) {
+      if (filters?.productId) {
         productIdCondition =
-          options.productId === "all"
+          filters.productId === "all"
             ? true
-            : item.productId === options.productId;
+            : item.productId === filters.productId;
       }
 
       let fromCondition: boolean = true;
-      if (options?.from) {
+      if (filters?.from) {
         fromCondition =
-          new Date(options.from).getTime() <= new Date(item.date).getTime();
+          new Date(filters.from).getTime() <= new Date(item.date).getTime();
       }
 
       let toCondition: boolean = true;
-      if (options?.to) {
+      if (filters?.to) {
         toCondition =
-          new Date(item.date).getTime() <= new Date(options.to).getTime();
+          new Date(item.date).getTime() <= new Date(filters.to).getTime();
       }
 
       return (
-        storeIdConditon && productIdCondition && fromCondition && toCondition
+        producerCondition &&
+        storeIdConditon &&
+        productIdCondition &&
+        fromCondition &&
+        toCondition
       );
     })
     .map((item) => {
@@ -96,13 +103,31 @@ export const getSalesData = async (
   return resultSalesData;
 };
 
-export const getTodaySyunSalesData = async (): Promise<{
-  header: string;
-  todaySyunSalesData: SyunSales[];
-}> => {
+export const getTodaySyunSalesData = async (
+  producers: Producer[]
+): Promise<SyunSales[]> => {
+  let resultSyunSalesData: SyunSales[] = [];
+  if (producers.length === 0) {
+    return [];
+  }
+  for (let i = 0; i < producers.length; i++) {
+    const todaySyunSalesData: SyunSales[] = await getProducerSyunSalesData(
+      producers[i].id,
+      producers[i].password
+    );
+    resultSyunSalesData = [...resultSyunSalesData, ...todaySyunSalesData];
+  }
+  return resultSyunSalesData;
+};
+
+export const getProducerSyunSalesData = async (
+  syunId: string,
+  syunPw: string
+): Promise<SyunSales[]> => {
   const syunUrl: string | undefined = process.env.SYUNURL;
-  const syunId: string | undefined = process.env.SYUNID;
-  const syunPw: string | undefined = process.env.SYUNPW;
+  if (!syunUrl || !syunId || !syunPw) {
+    return [];
+  }
   const todayUrl: string = `${syunUrl}?id=${syunId}&pw=${syunPw}&mode=yesterday`;
   const textDecoder = new TextDecoder("shift-jis");
   const response = await fetch(todayUrl, { cache: "no-store" });
@@ -112,7 +137,7 @@ export const getTodaySyunSalesData = async (): Promise<{
   const header: string = $("h3").text();
   const date = convertDateTextToDateString(header);
   if (!date) {
-    return { header: "", todaySyunSalesData: [] };
+    return [];
   }
   let storeName: string = "";
   let todaySyunSalesData: SyunSales[] = [];
@@ -147,6 +172,7 @@ export const getTodaySyunSalesData = async (): Promise<{
 
       todaySyunSalesData.push({
         date: date,
+        producerId: syunId.toString(),
         storeName: storeName,
         productName: productName,
         unitPrice: unitPrice,
@@ -155,7 +181,7 @@ export const getTodaySyunSalesData = async (): Promise<{
       });
     }
   });
-  return { header, todaySyunSalesData };
+  return todaySyunSalesData;
 };
 export const fetchSalesFilter = async (): Promise<{ stores: Store[] }> => {
   const tables: Tables = await getTables(["店舗"]);
@@ -165,14 +191,14 @@ export const fetchSalesFilter = async (): Promise<{ stores: Store[] }> => {
 };
 
 export const fetchSalesList = async (
-  options: SalesFilters
+  filters: SalesFilters
 ): Promise<{
   today: string;
   todaySalesData: Sales[];
   totalSalesData: TotalSales[];
 }> => {
   const today: string = await getToday();
-  const salesData = await getSalesData(options);
+  const salesData = await getSalesData(filters);
   const todaySalesData: Sales[] = salesData.filter(
     (item) => item.date === today
   );

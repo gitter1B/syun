@@ -7,16 +7,17 @@ import {
   rowDelete,
   rowUpdate,
 } from "@/lib/sheet";
-import { Stock, Tables, Waste } from "@/lib/types";
+import { Producer, Stock, Tables, Waste } from "@/lib/types";
 import { WasteSchema } from "@/schemas";
 import { formatInTimeZone } from "date-fns-tz";
 import { sheets_v4 } from "googleapis";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { convertWastes } from "../convert-data";
+import { convertProducers, convertWastes } from "../convert-data";
 import { auth } from "@/auth";
 
 export const createWaste = async (
+  producerId: string,
   date: string,
   quantity: string,
   stock: Stock
@@ -26,8 +27,15 @@ export const createWaste = async (
     return { status: "error", message: "認証エラー" };
   }
   const sheets: sheets_v4.Sheets = await getSheets();
-  const tables: Tables = await getTables(["廃棄"]);
+  const tables: Tables = await getTables(["廃棄", "生産者"]);
   const wastes: Waste[] = await convertWastes(tables["廃棄"].data);
+  const producers: Producer[] = await convertProducers(tables["生産者"].data);
+  if (!producers.find((producer) => producer.id === producerId)) {
+    return {
+      status: "error",
+      message: "生産者がいません。",
+    };
+  }
   const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
   if (!spreadsheetId) {
     return { status: "error", message: "スプレッドシートIDがありません。" };
@@ -39,6 +47,7 @@ export const createWaste = async (
   const newValues: string[][] = [
     [
       newId,
+      producerId,
       date,
       stock.productId,
       stock.unitPrice.toString(),
@@ -46,6 +55,7 @@ export const createWaste = async (
       stock.storeId,
     ],
   ];
+
   try {
     await appendValues(sheets, spreadsheetId, "廃棄", newValues);
   } catch (error: any) {
@@ -94,6 +104,7 @@ export const updateWaste = async (
   const updateValues: string[][] = [
     [
       wasteId,
+      waste.producerId,
       formatInTimeZone(date, "Asia/Tokyo", "yyyy-MM-dd"),
       waste.productId,
       waste.unitPrice.toString(),

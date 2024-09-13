@@ -20,7 +20,9 @@ type PriceCard = {
     fill: string;
   }[];
 };
-export const getTotalPriceCardData = async (): Promise<{
+export const getTotalPriceCardData = async (
+  producerId: string
+): Promise<{
   todayPriceCardData: PriceCard;
   monthPriceCardData: PriceCard;
   yearPriceCardData: PriceCard;
@@ -31,6 +33,7 @@ export const getTotalPriceCardData = async (): Promise<{
   const thisMonth: number = parseInt(month);
 
   const yearSalesData: Sales[] = await getSalesData({
+    producerId,
     from: `${thisYear}-01-01`,
     to: `${thisYear}-12-31`,
   });
@@ -95,11 +98,13 @@ const getSalesTotalPrice = async (salesData: Sales[]): Promise<number> => {
   return salesData.reduce((prev, cur) => prev + cur.totalPrice, 0);
 };
 
-export const getDashboardStock = async (): Promise<{
+export const getDashboardStock = async (
+  producerId: string
+): Promise<{
   stocks: Stock[];
   existStoreItems: { storeId: string; storeName: string }[];
 }> => {
-  const stocks: Stock[] = await getStocks();
+  const stocks: Stock[] = await getStocks(producerId);
   const existStoreItems: { storeId: string; storeName: string }[] = stocks
     .filter(
       (item, index, self) =>

@@ -1,6 +1,6 @@
 "use server";
 
-import { Shipment, Tables } from "@/lib/types";
+import { Producer, Shipment, Tables } from "@/lib/types";
 import { ShipmentSchema } from "@/schemas";
 import { sheets_v4 } from "googleapis";
 import { z } from "zod";
@@ -11,12 +11,13 @@ import {
   rowDelete,
   rowUpdate,
 } from "@/lib/sheet";
-import { convertShipments } from "@/lib/convert-data";
+import { convertProducers, convertShipments } from "@/lib/convert-data";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
 export const createShipment = async (
   values: z.infer<typeof ShipmentSchema>,
+  producerId: string,
   date: string,
   storeId: string
 ): Promise<{ status: string; message: string }> => {
@@ -29,10 +30,6 @@ export const createShipment = async (
   if (!spreadsheetId) {
     return { status: "error", message: "スプレッドシートIDがありません。" };
   }
-  const tables: Tables = await getTables(["出荷"]);
-  const shipments: Shipment[] = await convertShipments(tables["出荷"].data);
-  const newId: number =
-    Math.max(...shipments.map((item) => Number(item.id))) + 1;
 
   const validatedFields = ShipmentSchema.safeParse(values);
   if (!validatedFields.success) {
@@ -42,14 +39,29 @@ export const createShipment = async (
     };
   }
   try {
-    const session = await auth();
-    if (!session) {
-      return { status: "error", message: "認証エラー" };
+    const tables: Tables = await getTables(["出荷", "生産者"]);
+    const shipments: Shipment[] = await convertShipments(tables["出荷"].data);
+    const producers: Producer[] = await convertProducers(tables["生産者"].data);
+    if (!producers.find((producer) => producer.id === producerId)) {
+      return {
+        status: "error",
+        message: "生産者がいません。",
+      };
     }
+    const newId: number =
+      Math.max(...shipments.map((item) => Number(item.id))) + 1;
     const { product: productId, unitPrice, quantity } = values;
 
     const newValues: string[][] = [
-      [newId.toString(), date, productId, unitPrice, quantity, storeId],
+      [
+        newId.toString(),
+        producerId,
+        date,
+        productId,
+        unitPrice,
+        quantity,
+        storeId,
+      ],
     ];
 
     await appendValues(sheets, spreadsheetId, "出荷", newValues);
@@ -63,9 +75,7 @@ export const createShipment = async (
 
 export const updateShipment = async (
   values: z.infer<typeof ShipmentSchema>,
-  shipmentId: string,
-  date: string,
-  storeId: string
+  shipmentId: string
 ): Promise<{ status: string; message: string }> => {
   const session = await auth();
   if (!session) {
@@ -80,7 +90,7 @@ export const updateShipment = async (
   }
 
   try {
-    const { product: productId, unitPrice, quantity } = values;
+    const { unitPrice, quantity } = values;
     const sheets: sheets_v4.Sheets = await getSheets();
     const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
     if (!spreadsheetId) {
@@ -89,6 +99,12 @@ export const updateShipment = async (
     const tables: Tables = await getTables(["出荷"]);
     const shipments: Shipment[] = await convertShipments(tables["出荷"].data);
 
+    const targetShipment: Shipment | undefined = shipments.find(
+      (s) => s.id === shipmentId
+    );
+    if (!targetShipment) {
+      return { status: "error", message: "変更されませんでした。" };
+    }
     let rowNumber: number = 0;
     for (let i = 0; i < shipments.length; i++) {
       if (shipments[i].id === shipmentId) {
@@ -99,14 +115,14 @@ export const updateShipment = async (
     const updateValues: string[][] = [
       [
         shipmentId,
-        date,
-        productId,
+        targetShipment.producerId,
+        targetShipment.date,
+        targetShipment.productId,
         unitPrice.toString(),
         quantity.toString(),
-        storeId,
+        targetShipment.storeId,
       ],
     ];
-
     await rowUpdate(sheets, spreadsheetId, "出荷", rowNumber, updateValues);
   } catch (error) {
     console.error(error);

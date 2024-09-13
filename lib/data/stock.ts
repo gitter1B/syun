@@ -1,4 +1,5 @@
 import {
+  convertProducers,
   convertProducts,
   convertSales,
   convertShipments,
@@ -8,6 +9,7 @@ import {
 } from "@/lib/convert-data";
 import { getTables } from "@/lib/sheet";
 import {
+  Producer,
   Product,
   Sales,
   Shipment,
@@ -17,10 +19,11 @@ import {
   Tables,
   Waste,
 } from "@/lib/types";
-import { getTodaySyunSalesData } from "./sales";
+import { getProducerSyunSalesData, getTodaySyunSalesData } from "./sales";
 
-export const getStocks = async (): Promise<Stock[]> => {
+export const getStocks = async (producerId: string): Promise<Stock[]> => {
   const tables: Tables = await getTables([
+    "生産者",
     "商品",
     "店舗",
     "出荷",
@@ -30,13 +33,15 @@ export const getStocks = async (): Promise<Stock[]> => {
   if (!tables) {
     return [];
   }
-  const { todaySyunSalesData }: { todaySyunSalesData: SyunSales[] } =
-    await getTodaySyunSalesData();
 
   const products: Product[] = await convertProducts(tables["商品"].data);
   const stores: Store[] = await convertStores(tables["店舗"].data);
   const shipments: Shipment[] = await convertShipments(tables["出荷"].data);
   const salesData: Sales[] = await convertSales(tables["販売"].data);
+  const producers: Producer[] = await convertProducers(tables["生産者"].data);
+  const todaySyunSalesData: SyunSales[] = await getTodaySyunSalesData(
+    producers
+  );
   const todaySalesData: Sales[] = await convertSyunToSales(
     salesData,
     todaySyunSalesData,
@@ -68,51 +73,57 @@ export const getStocks = async (): Promise<Stock[]> => {
   );
 
   const newStocks: Stock[] = await Promise.all(
-    uniqueShipments.map(async ({ storeId, productId, unitPrice }, index) => {
-      const productName: string =
-        products.find((p) => p.id === productId)?.name || "";
-      const storeName: string =
-        stores.find((s) => s.id === storeId)?.name || "";
-      const shipmentTotalQuantity: number = await getTotalQuantity(
-        filteredShipments,
-        storeId,
-        productId,
-        unitPrice
-      );
+    uniqueShipments
+      .filter((item) => item.producerId === producerId)
+      .map(async ({ producerId, storeId, productId, unitPrice }, index) => {
+        const productName: string =
+          products.find((p) => p.id === productId)?.name || "";
+        const storeName: string =
+          stores.find((s) => s.id === storeId)?.name || "";
+        const shipmentTotalQuantity: number = await getTotalQuantity(
+          filteredShipments,
+          producerId,
+          storeId,
+          productId,
+          unitPrice
+        );
 
-      const salesTotalQuantity: number = await getTotalQuantity(
-        filteredSalesData,
-        storeId,
-        productId,
-        unitPrice
-      );
+        const salesTotalQuantity: number = await getTotalQuantity(
+          filteredSalesData,
+          producerId,
+          storeId,
+          productId,
+          unitPrice
+        );
 
-      const wasteTotalQuantity: number = await getTotalQuantity(
-        wastes,
-        storeId,
-        productId,
-        unitPrice
-      );
+        const wasteTotalQuantity: number = await getTotalQuantity(
+          wastes,
+          producerId,
+          storeId,
+          productId,
+          unitPrice
+        );
 
-      const totalQuantity: number =
-        shipmentTotalQuantity - salesTotalQuantity - wasteTotalQuantity;
+        const totalQuantity: number =
+          shipmentTotalQuantity - salesTotalQuantity - wasteTotalQuantity;
 
-      return {
-        id: (index + 1).toString(),
-        storeId: storeId,
-        productId: productId,
-        unitPrice: unitPrice,
-        quantity: totalQuantity,
-        productName: productName,
-        storeName: storeName,
-      };
-    })
+        return {
+          id: (index + 1).toString(),
+          storeId: storeId,
+          productId: productId,
+          unitPrice: unitPrice,
+          quantity: totalQuantity,
+          productName: productName,
+          storeName: storeName,
+        };
+      })
   );
   return newStocks.filter((stock) => stock.quantity !== 0);
 };
 
 export const getTotalQuantity = async (
   data: Shipment[] | Sales[] | Waste[],
+  producerId: string,
   storeId: string,
   productId: string,
   unitPrice: number
@@ -123,6 +134,7 @@ export const getTotalQuantity = async (
   const totalQuantity: number = data
     .filter((item) => {
       return (
+        item.producerId === producerId &&
         item.storeId === storeId &&
         item.productId === productId &&
         item.unitPrice === unitPrice
@@ -136,8 +148,8 @@ export const getUniqueShipments = async (
   shipments: Shipment[]
 ): Promise<Shipment[]> => {
   const seen = new Set();
-  return shipments.filter(({ storeId, productId, unitPrice }) => {
-    const key = `${storeId}-${productId}-${unitPrice}`;
+  return shipments.filter(({ producerId, storeId, productId, unitPrice }) => {
+    const key = `${producerId}-${storeId}-${productId}-${unitPrice}`;
     if (seen.has(key)) {
       return false;
     }
@@ -146,11 +158,13 @@ export const getUniqueShipments = async (
   });
 };
 
-export const fetchStockTable = async (): Promise<{
+export const fetchStockTable = async (
+  producerId: string
+): Promise<{
   stocks: Stock[];
   existStoreItems: { storeId: string; storeName: string }[];
 }> => {
-  const stocks: Stock[] = await getStocks();
+  const stocks: Stock[] = await getStocks(producerId);
   const existStoreItems: { storeId: string; storeName: string }[] = stocks
     .filter(
       (item, index, self) =>

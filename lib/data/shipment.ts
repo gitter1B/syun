@@ -1,18 +1,32 @@
 import {
+  convertProducers,
   convertProducts,
   convertShipments,
   convertStores,
 } from "@/lib/convert-data";
 import { getTables } from "@/lib/sheet";
-import { Product, Shipment, ShipmentFilters, Store, Tables } from "@/lib/types";
+import {
+  Producer,
+  Product,
+  Shipment,
+  ShipmentFilters,
+  Store,
+  Tables,
+} from "@/lib/types";
 
 export const getShipments = async (
   options?: ShipmentFilters
-): Promise<{ products: Product[]; stores: Store[]; shipments: Shipment[] }> => {
-  const tables: Tables = await getTables(["商品", "店舗", "出荷"]);
+): Promise<{
+  products: Product[];
+  stores: Store[];
+  shipments: Shipment[];
+  producers: Producer[];
+}> => {
+  const tables: Tables = await getTables(["商品", "店舗", "出荷", "生産者"]);
   const products: Product[] = await convertProducts(tables["商品"].data);
   const stores: Store[] = await convertStores(tables["店舗"].data);
   const shipments: Shipment[] = await convertShipments(tables["出荷"].data);
+  const producers: Producer[] = await convertProducers(tables["生産者"].data);
   const sortedProducts: Product[] = await getRecentSortedProducts(
     shipments,
     products
@@ -21,8 +35,13 @@ export const getShipments = async (
   return {
     products: sortedProducts,
     stores,
+    producers,
     shipments: shipments
       .filter((shipment) => {
+        let producerIdCondition: boolean = true;
+        if (options?.producerId) {
+          producerIdCondition = shipment.producerId === options.producerId;
+        }
         let storeIdCondition: boolean = true;
         if (options?.storeId) {
           storeIdCondition = shipment.storeId === options.storeId;
@@ -31,7 +50,7 @@ export const getShipments = async (
         if (options?.date) {
           dateCondition = shipment.date === options.date;
         }
-        return storeIdCondition && dateCondition;
+        return producerIdCondition && storeIdCondition && dateCondition;
       })
       .map((shipment) => {
         const product: Product | undefined = products.find(
