@@ -1,4 +1,6 @@
 import {
+  Producer,
+  ProducerDTO,
   Product,
   Sales,
   Shipment,
@@ -56,11 +58,12 @@ export const convertShipments = async (
     ? values.map((row) => {
         return {
           id: row[0],
-          date: row[1],
-          productId: row[2],
-          unitPrice: Number(row[3]),
-          quantity: Number(row[4]),
-          storeId: row[5],
+          producerId: row[1],
+          date: row[2],
+          productId: row[3],
+          unitPrice: Number(row[4]),
+          quantity: Number(row[5]),
+          storeId: row[6],
         };
       })
     : [];
@@ -73,12 +76,13 @@ export const convertSales = async (
     ? values.map((row) => {
         return {
           id: row[0],
-          date: row[1],
-          productId: row[2],
-          unitPrice: Number(row[3]),
-          quantity: Number(row[4]),
-          totalPrice: Number(row[5]),
-          storeId: row[6],
+          producerId: row[1],
+          date: row[2],
+          productId: row[3],
+          unitPrice: Number(row[4]),
+          quantity: Number(row[5]),
+          totalPrice: Number(row[6]),
+          storeId: row[7],
         };
       })
     : [];
@@ -91,11 +95,39 @@ export const convertWastes = async (
     ? values.map((row) => {
         return {
           id: row[0],
-          date: row[1],
-          productId: row[2],
-          unitPrice: Number(row[3]),
-          quantity: Number(row[4]),
-          storeId: row[5],
+          producerId: row[1],
+          date: row[2],
+          productId: row[3],
+          unitPrice: Number(row[4]),
+          quantity: Number(row[5]),
+          storeId: row[6],
+        };
+      })
+    : [];
+};
+
+export const convertProducers = async (
+  values: string[][] | null | undefined
+): Promise<Producer[]> => {
+  return values
+    ? values.map((row) => {
+        return {
+          id: row[0],
+          password: row[1],
+          name: row[2],
+        };
+      })
+    : [];
+};
+
+export const convertProducersDTO = async (
+  values: string[][] | null | undefined
+): Promise<ProducerDTO[]> => {
+  return values
+    ? values.map((row) => {
+        return {
+          id: row[0],
+          name: row[2],
         };
       })
     : [];
@@ -152,6 +184,7 @@ export const convertSyunToSales = async (
       stores.find((s) => s.name === item.storeName)?.id || "";
     return {
       id: (index + Number(firstId)).toString(),
+      producerId: item.producerId,
       date: item.date,
       productId: productId,
       unitPrice: item.unitPrice,

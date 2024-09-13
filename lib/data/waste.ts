@@ -20,7 +20,7 @@ export const fetchWasteFilters = async (): Promise<{
 };
 
 export const fetchWasteList = async (
-  options?: WasteFilters
+  filters?: WasteFilters
 ): Promise<{ wastes: Waste[] }> => {
   const tables: Tables = await getTables(["商品", "店舗", "廃棄"]);
   const products: Product[] = await convertProducts(tables["商品"].data);
@@ -29,19 +29,23 @@ export const fetchWasteList = async (
 
   const resultWastes: Waste[] = wastes
     .filter((item) => {
+      let producerCondition: boolean = true;
+      if (filters?.producerId) {
+        producerCondition = item.producerId === filters.producerId;
+      }
       let storeIdCondition: boolean = true;
-      if (options?.storeId) {
+      if (filters?.storeId) {
         storeIdCondition =
-          options.storeId === "all" ? true : item.storeId === options.storeId;
+          filters.storeId === "all" ? true : item.storeId === filters.storeId;
       }
       let productIdCondition: boolean = true;
-      if (options?.productId) {
+      if (filters?.productId) {
         productIdCondition =
-          options.productId === "all"
+          filters.productId === "all"
             ? true
-            : item.productId === options.productId;
+            : item.productId === filters.productId;
       }
-      return storeIdCondition && productIdCondition;
+      return producerCondition && storeIdCondition && productIdCondition;
     })
     .map((item) => {
       const store: Store | undefined = stores.find(

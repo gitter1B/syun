@@ -10,7 +10,7 @@ export const LoginSchema = z.object({
 });
 
 export const ShipmentSchema = z.object({
-  product: z.string().min(1, { message: "店舗を選択してください。" }),
+  product: z.string().min(1, { message: "商品を選択してください。" }),
   unitPrice: z
     .string()
     .min(1, { message: "価格を入力してください。" })

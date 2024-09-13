@@ -23,7 +23,7 @@ export const UserMenu = () => {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="start">
         <DropdownMenuLabel>アカウント</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem

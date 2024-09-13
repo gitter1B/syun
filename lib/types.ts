@@ -16,6 +16,7 @@ export type Product = {
 
 export type Shipment = {
   id: string;
+  producerId: string;
   date: string;
   productId: string;
   unitPrice: number;
@@ -26,12 +27,14 @@ export type Shipment = {
 };
 
 export type ShipmentFilters = {
-  storeId: string;
-  date: string;
+  producerId?: string;
+  storeId?: string;
+  date?: string;
 };
 
 export type Sales = {
   id: string;
+  producerId: string;
   date: string;
   productId: string;
   unitPrice: number;
@@ -43,6 +46,7 @@ export type Sales = {
 };
 
 export type SalesFilters = {
+  producerId?: string;
   storeId?: string;
   productId?: string;
   from?: string;
@@ -57,6 +61,7 @@ export type TotalSales = {
 };
 
 export type SyunSales = {
+  producerId: string;
   date: string;
   storeName: string;
   productName: string;
@@ -67,6 +72,7 @@ export type SyunSales = {
 
 export type Waste = {
   id: string;
+  producerId: string;
   date: string;
   storeId: string;
   productId: string;
@@ -77,6 +83,7 @@ export type Waste = {
 };
 
 export type WasteFilters = {
+  producerId?: string;
   storeId?: string;
   productId?: string;
 };
@@ -91,9 +98,16 @@ export type Stock = {
   storeName?: string;
 };
 
-// export type StockItem = Stock & {
-//   productName: string;
-// };
+export type ProducerDTO = {
+  id: string;
+  name: string;
+};
+
+export type Producer = ProducerDTO & {
+  password: string;
+};
+
+export type ProducerWithPassword = Producer & { password: string };
 
 export type NavItem = {
   label: string;

@@ -5,9 +5,8 @@ import { usePathname } from "next/navigation";
 
 export const PageTitle = () => {
   const pathname = usePathname();
-
-  const title: string | undefined = linkItems.find(
-    (item) => item.href === pathname
+  const title: string | undefined = linkItems.find((item) =>
+    pathname.includes(item.href)
   )?.label;
-  return <div className="text-lg font-semibold">{title}</div>;
+  return <div className="text-xl font-semibold">{title}</div>;
 };

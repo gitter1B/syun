@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 export const linkItems: NavItem[] = [
-  { href: "/", label: "ホーム", icon: <HomeIcon /> },
+  { href: "/dashboard", label: "ホーム", icon: <HomeIcon /> },
   {
     href: "/shipment",
     label: "出荷",
@@ -16,7 +16,7 @@ export const linkItems: NavItem[] = [
   },
   {
     href: "/sales",
-    label: "販売",
+    label: "売上",
     icon: <CalculatorIcon />,
   },
   {
