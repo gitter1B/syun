@@ -1,8 +1,17 @@
 import { Suspense } from "react";
-import { SalesList } from "./components/sales-list";
-import { SalesFilter } from "./components/sales-filter";
+
+import { SalesFilters } from "@/features/sales/lib/types";
+
 import { getToday } from "@/lib/date";
-import { SalesFilters } from "@/lib/types";
+
+import {
+  SalesFilterGroup,
+  SalesFilterGroupSkeleton,
+} from "@/features/sales/components/sales-filter-group";
+import {
+  SalesList,
+  SalesListSkeleton,
+} from "@/features/sales/components/sales-list";
 
 export default async function SalesPage({
   params,
@@ -25,12 +34,16 @@ export default async function SalesPage({
   };
 
   return (
-    <div className="flex flex-col gap-4 h-full">
-      <SalesFilter />
-      <div className="flex-1">
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-semibold">売上</h1>
+      <div className="flex flex-col gap-4 border rounded-sm p-4">
+        <Suspense fallback={<SalesFilterGroupSkeleton />}>
+          <SalesFilterGroup />
+        </Suspense>
+        <span className="border-b-2 my-1" />
         <Suspense
           key={JSON.stringify(searchParams)}
-          fallback={<p>loading...</p>}
+          fallback={<SalesListSkeleton />}
         >
           <SalesList filters={filters} page={page} />
         </Suspense>
