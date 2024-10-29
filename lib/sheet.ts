@@ -1,8 +1,10 @@
-"use server";
+import "server-only";
+
 import { google, sheets_v4 } from "googleapis";
 import { Tables } from "./types";
+import { cache } from "react";
 
-export const getSheets = async (): Promise<sheets_v4.Sheets> => {
+export const getSheets = cache(async (): Promise<sheets_v4.Sheets> => {
   const privateKey = process.env.PRIVATE_KEY?.replace(/\\n/g, "\n");
   const clientEmail = process.env.CLIENT_EMAIL;
   const auth = new google.auth.GoogleAuth({
@@ -14,79 +16,73 @@ export const getSheets = async (): Promise<sheets_v4.Sheets> => {
   });
 
   const sheets = await google.sheets({ version: "v4", auth });
+  console.log("get sheets");
   return sheets;
-};
+});
 
-export const getTables = async (ranges: string[]): Promise<Tables> => {
-  const sheets: sheets_v4.Sheets = await getSheets();
-  const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+export const getTable = cache(
+  async (sheetName: string): Promise<string[][]> => {
+    const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
 
-  if (!spreadsheetId) {
-    console.error("Spreadsheet ID is undefined");
-    return {};
+    if (!spreadsheetId) {
+      console.error("Spreadsheet ID is undefined");
+      return [];
+    }
+    const sheets: sheets_v4.Sheets = await getSheets();
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: sheetName,
+      });
+      console.log("get table");
+      return response.data.values as string[][];
+    } catch (error: unknown) {
+      console.error((error as Error).message);
+      return [];
+    }
   }
+);
 
-  try {
-    const response = await sheets.spreadsheets.values.batchGet({
-      spreadsheetId,
-      ranges,
-    });
+export const getTables = cache(
+  async (sheets: sheets_v4.Sheets, ranges: string[]): Promise<Tables> => {
+    const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
 
-    const valueRanges: sheets_v4.Schema$ValueRange[] | undefined =
-      response.data.valueRanges;
-
-    if (!valueRanges) {
+    if (!spreadsheetId) {
+      console.error("Spreadsheet ID is undefined");
       return {};
     }
 
-    return Object.fromEntries(
-      ranges.map((name, index) => {
-        const values = valueRanges[index]?.values ?? [];
-        const header = values[0] ?? [];
-        const data = values.slice(1);
-        return [name, { header, data }];
-      })
-    );
-  } catch (error: unknown) {
-    console.error((error as Error).message);
-    return {};
+    try {
+      const response = await sheets.spreadsheets.values.batchGet({
+        spreadsheetId,
+        ranges,
+      });
+
+      const valueRanges: sheets_v4.Schema$ValueRange[] | undefined =
+        response.data.valueRanges;
+
+      if (!valueRanges) {
+        return {};
+      }
+
+      return Object.fromEntries(
+        ranges.map((name, index) => {
+          const values = valueRanges[index]?.values ?? [];
+          const header = values[0] ?? [];
+          const data = values.slice(1);
+          return [name, { header, data }];
+        })
+      );
+    } catch (error: unknown) {
+      console.error((error as Error).message);
+      return {};
+    }
   }
-};
-// export const getTables = async (
-//   ranges: string[]
-// ): Promise<sheets_v4.Schema$ValueRange[]> => {
-//   const sheets: sheets_v4.Sheets = await getSheets();
-//   const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
+);
 
-//   if (!spreadsheetId) {
-//     console.error("Spreadsheet ID is undefined");
-//     return [];
-//   }
-
-//   try {
-//     const response = await sheets.spreadsheets.values.batchGet({
-//       spreadsheetId: spreadsheetId,
-//       ranges,
-//     });
-
-//     const data: sheets_v4.Schema$ValueRange[] | undefined =
-//       response.data.valueRanges;
-//     if (!data) {
-//       return [];
-//     }
-//     return data;
-//   } catch (error: unknown) {
-//     console.error((error as Error).message);
-//     return [];
-//   }
-// };
-
-export const appendValues = async (
-  sheets: sheets_v4.Sheets,
-  spreadsheetId: string | undefined,
-  sheetName: string,
-  values: string[][]
-) => {
+export const appendValues = async (sheetName: string, values: string[][]) => {
+  const sheets: sheets_v4.Sheets = await getSheets();
+  const spreadsheetId: string | undefined = process.env.SPREADSHEET_ID;
   try {
     if (spreadsheetId) {
       await sheets.spreadsheets.values.append({

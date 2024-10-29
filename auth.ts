@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { LoginSchema } from "@/schemas";
-import { User } from "./lib/types";
+import { LoginSchema } from "@/lib/schemas";
+import { User } from "@/features/users/lib/types";
 import { headers } from "next/headers";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({

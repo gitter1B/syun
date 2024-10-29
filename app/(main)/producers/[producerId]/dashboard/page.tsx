@@ -1,8 +1,12 @@
 import { Suspense } from "react";
-import { DashboardStock } from "./components/dashboard-stock";
-import { DashboardStockSkeleton } from "./components/dashboard-stock-skeleton";
-import { DashboardSales } from "./components/dashboard-sales";
-import { DashboardSalesSkeleton } from "./components/dashboard-sales-skeleton";
+import {
+  TotalSalesCard,
+  TotalSalesCardSkeleton,
+} from "@/features/sales/components/total-sales-card";
+import {
+  StockList,
+  StockListSkeleton,
+} from "@/features/stocks/components/stock-list";
 
 export const dynamic = "force-dynamic";
 
@@ -13,13 +17,24 @@ export default async function Dashboard({
 }) {
   const producerId: string = params.producerId;
   return (
-    <div className="flex flex-col gap-4">
-      <Suspense fallback={<DashboardSalesSkeleton />}>
-        <DashboardSales producerId={producerId} />
-      </Suspense>
-      <Suspense fallback={<DashboardStockSkeleton />}>
-        <DashboardStock producerId={producerId} />
-      </Suspense>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-2xl font-semibold">集計</h2>
+        <Suspense fallback={<TotalSalesCardSkeleton />}>
+          <TotalSalesCard producerId={producerId} />
+        </Suspense>
+      </div>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-semibold">残数</h1>
+        <div className="p-4 border rounded-sm">
+          <Suspense
+            key={JSON.stringify(producerId)}
+            fallback={<StockListSkeleton />}
+          >
+            <StockList producerId={producerId} action={false} />
+          </Suspense>
+        </div>
+      </div>
     </div>
   );
 }

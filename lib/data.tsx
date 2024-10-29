@@ -8,25 +8,25 @@ import {
 } from "lucide-react";
 
 export const linkItems: NavItem[] = [
-  { href: "/dashboard", label: "ホーム", icon: <HomeIcon /> },
+  { href: "/dashboard", label: "ホーム", icon: HomeIcon },
   {
-    href: "/shipment",
+    href: "/shipments",
     label: "出荷",
-    icon: <TruckIcon />,
+    icon: TruckIcon,
   },
   {
     href: "/sales",
     label: "売上",
-    icon: <CalculatorIcon />,
+    icon: CalculatorIcon,
   },
   {
-    href: "/stock",
+    href: "/stocks",
     label: "残数",
-    icon: <PackageIcon />,
+    icon: PackageIcon,
   },
   {
-    href: "/waste",
+    href: "/wastes",
     label: "回収／廃棄",
-    icon: <PackageXIcon />,
+    icon: PackageXIcon,
   },
 ];

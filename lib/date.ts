@@ -1,5 +1,6 @@
+import { Sales } from "@/features/sales/lib/types";
+
 import { formatInTimeZone } from "date-fns-tz";
-import { Sales } from "./types";
 
 export const getToday = async (): Promise<string> => {
   return formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
@@ -10,12 +11,10 @@ export function getDaysInMonth(year: number, month: number): number[] {
     throw new Error("Month must be between 1 and 12");
   }
   const daysInMonth = new Date(year, month, 0).getDate();
-
   const days: number[] = [];
   for (let day = 1; day <= daysInMonth; day++) {
     days.push(day);
   }
-
   return days;
 }
 

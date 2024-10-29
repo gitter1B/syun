@@ -1,12 +1,11 @@
-import { convertUsers } from "@/lib/convert-data";
-import { getTables } from "@/lib/sheet";
-import { Tables, User } from "@/lib/types";
+import { User } from "@/features/users/lib/types";
+
+import { getAllUsers } from "@/features/users/lib/data";
 
 export async function POST(req: Request) {
   try {
     const { username, password } = await req.json();
-    const tables: Tables = await getTables(["ユーザー"]);
-    const users: User[] = await convertUsers(tables["ユーザー"].data);
+    const users: User[] = await getAllUsers();
 
     const user: User | undefined = users.find(
       (u) => u.username === username && u.password === password
